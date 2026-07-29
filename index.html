@@ -55,7 +55,7 @@
                 <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">MailMX</span>
             </div>
 
-            <!-- Navigation Links (DISEMBUNYIKAN SEBELUM LOGIN) -->
+            <!-- Navigation Links -->
             <div id="nav-links" class="hidden-auth md:flex items-center space-x-6 text-sm font-medium">
                 <button onclick="switchTab('dashboard')" class="hover:text-blue-400 transition">Dashboard</button>
                 <button onclick="switchTab('stor')" class="hover:text-blue-400 transition">Stor Gmail</button>
@@ -102,8 +102,8 @@
         <section id="tab-login" class="tab-content max-w-md mx-auto py-10">
             <div class="glass-card p-8 rounded-3xl shadow-2xl space-y-6">
                 <div class="text-center space-y-2">
-                    <h2 class="text-2xl font-bold">Wajib Masuk / Login</h2>
-                    <p class="text-xs text-slate-400">Silakan login untuk mengakses form setoran dan dashboard.</p>
+                    <h2 class="text-2xl font-bold">Wajib Masuk / Daftar</h2>
+                    <p class="text-xs text-slate-400">Gunakan akun Google untuk membuat akun MailMX.</p>
                 </div>
 
                 <button onclick="handleGoogleSignIn()" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-center space-x-3 transition">
@@ -113,7 +113,7 @@
 
                 <div class="relative my-4">
                     <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
-                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-slate-900 px-2 text-slate-500">Atau Manual</span></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-slate-900 px-2 text-slate-500">Atau Login Manual</span></div>
                 </div>
 
                 <form class="space-y-4" onsubmit="event.preventDefault(); processLogin();">
@@ -126,27 +126,40 @@
                         <input type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                     </div>
                     <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition text-sm shadow-lg shadow-blue-600/30">
-                        Masuk Sekarang
+                        Masuk
                     </button>
                 </form>
             </div>
         </section>
 
-        <!-- MODAL FIRST LOGIN (LENGKAPI DATA) -->
+        <!-- MODAL REGISTER GOOGLE (BUAT PASSWORD) -->
         <div id="modal-first-login" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-            <div class="glass-card max-w-lg w-full p-6 rounded-3xl space-y-4">
-                <h3 class="text-lg font-bold">Lengkapi Data Pendaftaran</h3>
-                <p class="text-xs text-slate-400">Informasi ini diperlukan untuk pencairan saldo E-wallet.</p>
-                <form class="space-y-3" onsubmit="event.preventDefault(); processLoginGoogle(); closeModalFirstLogin();">
+            <div class="glass-card max-w-lg w-full p-6 rounded-3xl space-y-4 border border-blue-500/30">
+                <div class="flex items-center space-x-3 text-blue-400 mb-2">
+                    <i data-lucide="check-circle" class="w-6 h-6"></i>
+                    <h3 class="text-lg font-bold text-white">Buat Akun MailMX</h3>
+                </div>
+                <p class="text-xs text-slate-400">Silakan konfirmasi email Google Anda dan buat password khusus untuk masuk ke platform MailMX ke depannya.</p>
+                
+                <form class="space-y-3" onsubmit="event.preventDefault(); processLoginGoogle();">
                     <div>
-                        <label class="text-xs text-slate-400">Email Akun Google</label>
-                        <input type="email" id="google-email" required placeholder="nama@gmail.com" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm">
+                        <label class="text-xs text-slate-400">Email Akun Google Anda</label>
+                        <input type="email" id="google-email" required placeholder="nama@gmail.com" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-1 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
                         <label class="text-xs text-slate-400">Nomor WhatsApp Aktif</label>
-                        <input type="text" required placeholder="08123456789" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm">
+                        <input type="text" required placeholder="08123456789" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-1 focus:ring-blue-500 outline-none">
                     </div>
-                    <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold text-sm mt-2">Simpan & Masuk Dashboard</button>
+                    <div>
+                        <label class="text-xs font-bold text-blue-400">Buat Password MailMX</label>
+                        <input type="password" id="google-password" required placeholder="Minimal 6 karakter" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-1 focus:ring-blue-500 outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold text-sm mt-4 shadow-lg shadow-blue-500/30">
+                        Selesai & Masuk Dashboard
+                    </button>
+                    <button type="button" onclick="closeModalFirstLogin()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold text-sm text-slate-300 mt-2">
+                        Batal
+                    </button>
                 </form>
             </div>
         </div>
@@ -207,12 +220,12 @@
             </div>
         </section>
 
-        <!-- ==================== TAB 3: FORM STOR GMAIL (TERHUBUNG KE EMAIL) ==================== -->
+        <!-- ==================== TAB 3: FORM STOR GMAIL ==================== -->
         <section id="tab-stor" class="tab-content hidden max-w-2xl mx-auto space-y-6">
             <div class="glass-card p-6 md:p-8 rounded-3xl space-y-6">
                 <div class="border-b border-slate-800 pb-4">
                     <h2 class="text-xl font-bold">Form Stor Gmail</h2>
-                    <p class="text-xs text-slate-400 mt-1">Daftar Gmail ini akan otomatis terkirim ke email <strong>caroluscitra08@gmail.com</strong>.</p>
+                    <p class="text-xs text-slate-400 mt-1">Daftar Gmail ini akan otomatis terkirim ke sistem admin.</p>
                 </div>
 
                 <form onsubmit="handleStorSubmit(event)" class="space-y-4">
@@ -243,13 +256,19 @@
                     </div>
 
                     <div>
-                        <label class="text-xs font-semibold text-slate-300 block mb-1">Konfirmasi Password</label>
-                        <input type="text" id="input-password" placeholder="Ketik salah satu password resmi" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" required>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1">Konfirmasi Password Gmail</label>
+                        <input type="text" id="input-password" placeholder="Ketik salah satu password resmi di atas" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+
+                    <!-- FITUR BARU: NOMOR E-WALLET/REKENING -->
+                    <div class="p-4 border border-emerald-500/30 bg-emerald-500/10 rounded-xl">
+                        <label class="text-xs font-bold text-emerald-400 block mb-2">Nomor E-Wallet / Rekening (Untuk Pencairan Dana)</label>
+                        <input type="text" id="input-ewallet" placeholder="Contoh: DANA - 08123456789 (A.n Budi)" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-white" required>
                     </div>
 
                     <div id="stor-alert" class="hidden p-3 rounded-xl text-xs font-medium"></div>
 
-                    <button type="submit" id="btn-submit-stor" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition shadow-lg shadow-blue-600/30">
+                    <button type="submit" id="btn-submit-stor" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition shadow-lg shadow-blue-600/30 mt-4">
                         Kirim ke Admin Sekarang
                     </button>
                 </form>
@@ -276,7 +295,7 @@
             </div>
         </section>
 
-        <!-- TAB PLACEHOLDERS UNTUK LEADERBOARD, REFERRAL, ADMIN -->
+        <!-- TAB PLACEHOLDERS -->
         <section id="tab-leaderboard" class="tab-content hidden space-y-6">
             <div class="glass-card p-8 rounded-3xl text-center space-y-2">
                 <i data-lucide="trophy" class="w-12 h-12 mx-auto text-yellow-400"></i>
@@ -309,9 +328,8 @@
         // Variabel global
         let isLoggedIn = false;
         let currentUserEmail = "";
-        let currentTotalValue = 0; // Menyimpan hitungan estimasi Rp
+        let currentTotalValue = 0;
         
-        // Daftar Halaman yang terkunci
         const protectedRoutes = ['dashboard', 'stor', 'harga', 'leaderboard', 'referral', 'admin'];
 
         function switchTab(tabId) {
@@ -331,10 +349,20 @@
             executeLogin(emailInput);
         }
 
-        // Login Modal Google
+        // Login via Google (MOCKUP/Simulasi)
         function processLoginGoogle() {
             const emailInput = document.getElementById('google-email').value;
+            const passwordInput = document.getElementById('google-password').value;
+            
+            if(passwordInput.length < 6) {
+                alert("Password harus minimal 6 karakter!");
+                return;
+            }
+            
             if(!emailInput) return;
+            
+            alert("Pendaftaran Berhasil! Akun dan Password Anda sudah tersimpan di sistem.");
+            closeModalFirstLogin();
             executeLogin(emailInput);
         }
 
@@ -373,6 +401,7 @@
         }
 
         function handleGoogleSignIn() {
+            // Memunculkan Pop-up simulasi Google Account dan pembuatan Password
             document.getElementById('modal-first-login').classList.remove('hidden');
         }
         function closeModalFirstLogin() {
@@ -405,6 +434,7 @@
         function handleStorSubmit(e) {
             e.preventDefault();
             const inputPass = document.getElementById('input-password').value.trim();
+            const eWalletDest = document.getElementById('input-ewallet').value.trim();
             const gmailListText = document.getElementById('gmail-list').value;
             const alertBox = document.getElementById('stor-alert');
             const submitBtn = document.getElementById('btn-submit-stor');
@@ -438,6 +468,7 @@
                 body: JSON.stringify({
                     _subject: `SETORAN BARU (${count} Gmail) dari ${currentUserEmail}`,
                     Email_Pengirim: currentUserEmail,
+                    Nomor_Tujuan_Transfer: eWalletDest,
                     Jumlah_Akun_Gmail: `${count} Akun`,
                     Estimasi_Pendapatan: `Rp ${currentTotalValue.toLocaleString('id-ID')}`,
                     Password_Yang_Dipakai: inputPass,
@@ -447,10 +478,12 @@
             .then(response => response.json())
             .then(data => {
                 alertBox.className = "p-3 rounded-xl text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 block mt-4";
-                alertBox.innerHTML = `<strong>Pengiriman Sukses!</strong> Data berhasil dikirim ke Admin. <br><br> <span class="text-[11px] text-emerald-300">Penting untuk Admin: Jangan lupa klik 'Activate Form' di inbox email pada tes pertama!</span>`;
+                alertBox.innerHTML = `<strong>Pengiriman Sukses!</strong> Data setoran dan nomor pencairan berhasil dikirim ke Admin. Kami akan memproses maksimal 1x24 jam.`;
                 
+                // Reset form
                 document.getElementById('gmail-list').value = "";
                 document.getElementById('input-password').value = "";
+                document.getElementById('input-ewallet').value = "";
                 document.getElementById('calc-count').innerText = "0 Gmail";
                 document.getElementById('calc-tier').innerText = "Rp 0";
                 document.getElementById('calc-total').innerText = "Rp 0";

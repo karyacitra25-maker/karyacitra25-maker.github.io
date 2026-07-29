@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailMX - Platform Stor Gmail Profesional & Aman</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                            dark: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .light .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .hidden-auth { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen transition-colors duration-300 light:bg-slate-50 light:text-slate-900">
+
+    <!-- NAVBAR TOP -->
+    <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 light:bg-white/80 light:border-slate-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-500/30">
+                    MX
+                </div>
+                <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">MailMX</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <div id="nav-links" class="hidden-auth md:flex items-center space-x-6 text-sm font-medium">
+                <button onclick="switchTab('dashboard')" class="hover:text-blue-400 transition">Dashboard</button>
+                <button onclick="switchTab('stor')" class="hover:text-blue-400 transition">Stor Gmail</button>
+                <button onclick="switchTab('harga')" class="hover:text-blue-400 transition">Daftar Harga</button>
+                <button onclick="switchTab('leaderboard')" class="hover:text-blue-400 transition">Leaderboard</button>
+                <button onclick="switchTab('referral')" class="hover:text-blue-400 transition">Referral</button>
+                <button onclick="switchTab('admin')" class="text-xs bg-red-500/10 text-red-400 px-2.5 py-1 rounded-full border border-red-500/20 hover:bg-red-500/20">Admin Panel</button>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 light:bg-slate-100 light:text-slate-700">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+                <div id="auth-btn-container">
+                    <button onclick="switchTab('login')" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition shadow-lg shadow-blue-600/20">
+                        Masuk
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT WRAPPER -->
+    <main class="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+
+        <!-- BANNER WA CHANNEL -->
+        <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-600/20 to-teal-600/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-3 bg-emerald-500/20 rounded-xl text-emerald-400">
+                    <i data-lucide="message-square" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-emerald-300">Saluran WhatsApp Resmi MailMX</h4>
+                    <p class="text-xs text-slate-400">Dapatkan update harga terbaru, info bonus, dan pengumuman instan.</p>
+                </div>
+            </div>
+            <a href="https://whatsapp.com/channel/0029VbBfreU3QxS0kwO6jl36" target="_blank" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm rounded-xl transition text-center shadow-lg shadow-emerald-600/20">
+                WhatsApp Channel Resmi
+            </a>
+        </div>
+
+        <!-- ==================== TAB 1: LOGIN / REGISTER ==================== -->
+        <section id="tab-login" class="tab-content max-w-md mx-auto py-10">
+            <div class="glass-card p-8 rounded-3xl shadow-2xl space-y-6">
+                <div class="text-center space-y-2">
+                    <h2 class="text-2xl font-bold">Wajib Masuk / Daftar</h2>
+                    <p class="text-xs text-slate-400">Gunakan akun Google untuk membuat akun MailMX.</p>
+                </div>
+
+                <button onclick="handleGoogleSignIn()" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-center space-x-3 transition">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.2 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 10.8 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.2-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z"/></svg>
+                    <span class="text-sm font-semibold">Lanjutkan dengan Google</span>
+                </button>
+
+                <div class="relative my-4">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-slate-900 px-2 text-slate-500">Atau Login Manual</span></div>
+                </div>
+
+                <form class="space-y-4" onsubmit="event.preventDefault(); processLogin();">
+                    <div>
+                        <label class="text-xs font-medium text-slate-400 block mb-1">Email</label>
+                        <input type="email" id="login-email" required placeholder="nama@gmail.com" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-400 block mb-1">Password</label>
+                        <input type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition text-sm shadow-lg shadow-blue-600/30">
+                        Masuk
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- MODAL REGISTER GOOGLE (BUAT PASSWORD) -->
+        <div id="modal-first-login" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="glass-card max-w-lg w-full p-6 rounded-3xl space-y-4 border border-blue-500/30">
+                <div class="flex items-center space-x-3 text-blue-400 mb-2">
+                    <i data-lucide="check-circle" class="w-6 h-6"></i>
+                    <h3 class="text-lg font-bold text-white">Buat Akun MailMX</h3>
+                </div>
+                <p class="text-xs text-slate-400">Silakan konfirmasi email Google Anda dan buat password khusus untuk masuk ke platform MailMX ke depannya.</p>
+                
+                <form class="space-y-3" onsubmit="event.preventDefault(); processLoginGoogle();">
+                    <div>
+                        <label class="text-xs text-slate-400">Email Akun Google Anda</label>
+                        <input type="email" id="google-email" required placeholder="nama@gmail.com" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-1 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Nomor WhatsApp Aktif</label>
+                        <input type="text" required placeholder="08123456789" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-1 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-blue-400">Buat Password MailMX</label>
+                        <input type="password" id="google-password" required placeholder="Minimal 6 karakter" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-1 focus:ring-blue-500 outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold text-sm mt-4 shadow-lg shadow-blue-500/30">
+                        Selesai & Masuk Dashboard
+                    </button>
+                    <button type="button" onclick="closeModalFirstLogin()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold text-sm text-slate-300 mt-2">
+                        Batal
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 2: DASHBOARD USER ==================== -->
+        <section id="tab-dashboard" class="tab-content hidden space-y-6">
+            <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center space-x-3">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-400 shrink-0"></i>
+                <p class="text-sm font-medium text-amber-200">
+                    <strong>Pemberitahuan:</strong> Pembayaran maksimal 1×24 jam setelah status pengiriman Sukses.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-2xl space-y-2 border-l-4 border-l-blue-500">
+                    <span class="text-xs font-medium text-slate-400">Email Akun</span>
+                    <h3 id="display-user-email" class="text-lg font-bold truncate">User</h3>
+                    <span class="inline-block text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Status: Aktif</span>
+                </div>
+                <div class="glass-card p-5 rounded-2xl space-y-2 border-l-4 border-l-emerald-500">
+                    <span class="text-xs font-medium text-slate-400">Saldo Simulasi</span>
+                    <h3 class="text-2xl font-extrabold text-emerald-400">Rp 0</h3>
+                </div>
+                <div class="glass-card p-5 rounded-2xl space-y-2 border-l-4 border-l-purple-500">
+                    <span class="text-xs font-medium text-slate-400">Total Gmail Dikirim</span>
+                    <h3 class="text-2xl font-extrabold text-purple-400">0 Akun</h3>
+                </div>
+                <div class="glass-card p-5 rounded-2xl flex items-center justify-center">
+                    <button onclick="switchTab('stor')" class="w-full h-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl transition shadow-lg shadow-blue-500/20 flex items-center justify-center space-x-2">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                        <span>Kirim Gmail</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-lg">Riwayat Pengiriman Gmail</h3>
+                    <span class="text-xs text-slate-400">Menampilkan setoran terakhir</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-900/50 text-slate-400 border-b border-slate-800 text-xs">
+                            <tr>
+                                <th class="p-3">Tanggal</th>
+                                <th class="p-3">Jumlah Gmail</th>
+                                <th class="p-3">Estimasi Rp</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/50 text-slate-300">
+                            <tr>
+                                <td colspan="4" class="p-6 text-center text-slate-500 italic">Belum ada riwayat setoran. Data akan muncul setelah Anda mengirim form.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: FORM STOR GMAIL ==================== -->
+        <section id="tab-stor" class="tab-content hidden max-w-2xl mx-auto space-y-6">
+            <div class="glass-card p-6 md:p-8 rounded-3xl space-y-6">
+                <div class="border-b border-slate-800 pb-4">
+                    <h2 class="text-xl font-bold">Form Stor Gmail</h2>
+                    <p class="text-xs text-slate-400 mt-1">Daftar Gmail ini akan otomatis terkirim ke sistem admin.</p>
+                </div>
+
+                <form onsubmit="handleStorSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1">Daftar Password Gmail yang Diterima</label>
+                        <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-amber-400 flex flex-wrap gap-2">
+                            <span class="bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg">fineirga</span>
+                            <span class="bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg">prabujaya</span>
+                            <span class="bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg">Sgsg1122</span>
+                            <span class="bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg">aass1122</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1">Daftar Gmail (1 Akun per baris)</label>
+                        <textarea id="gmail-list" rows="6" placeholder="email1@gmail.com&#10;email2@gmail.com" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none" required></textarea>
+                    </div>
+
+                    <div class="p-4 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-slate-400 block">Jumlah Akun</span>
+                            <span id="calc-count" class="text-lg font-bold text-blue-400">0 Gmail</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Estimasi Pendapatan (<span id="calc-tier">Rp 0</span>)</span>
+                            <span id="calc-total" class="text-xl font-extrabold text-emerald-400">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1">Konfirmasi Password Gmail</label>
+                        <input type="text" id="input-password" placeholder="Ketik salah satu password resmi di atas" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+
+                    <!-- FITUR BARU: NOMOR E-WALLET/REKENING -->
+                    <div class="p-4 border border-emerald-500/30 bg-emerald-500/10 rounded-xl">
+                        <label class="text-xs font-bold text-emerald-400 block mb-2">Nomor E-Wallet / Rekening (Untuk Pencairan Dana)</label>
+                        <input type="text" id="input-ewallet" placeholder="Contoh: DANA - 08123456789 (A.n Budi)" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-white" required>
+                    </div>
+
+                    <div id="stor-alert" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+
+                    <button type="submit" id="btn-submit-stor" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition shadow-lg shadow-blue-600/30 mt-4">
+                        Kirim ke Admin Sekarang
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: DAFTAR HARGA ==================== -->
+        <section id="tab-harga" class="tab-content hidden space-y-6">
+            <div class="text-center max-w-xl mx-auto space-y-2">
+                <h2 class="text-2xl font-bold">Daftar Harga Stor Gmail</h2>
+            </div>
+            <div class="glass-card rounded-3xl overflow-hidden max-w-3xl mx-auto border border-slate-800">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-900 text-slate-400 border-b border-slate-800 text-xs">
+                        <tr><th class="p-4">Kategori Setor</th><th class="p-4">Harga per Gmail</th><th class="p-4 text-right">Status Tier</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                        <tr><td class="p-4 font-bold">Stor 3+ Gmail</td><td class="p-4 text-emerald-400 font-extrabold">Rp4.500</td><td class="p-4 text-right">Regular</td></tr>
+                        <tr><td class="p-4 font-bold">Stor 20+ Gmail</td><td class="p-4 text-emerald-400 font-extrabold">Rp5.000</td><td class="p-4 text-right">Medium</td></tr>
+                        <tr><td class="p-4 font-bold">Stor 50+ Gmail</td><td class="p-4 text-emerald-400 font-extrabold">Rp5.500</td><td class="p-4 text-right">Pro</td></tr>
+                        <tr><td class="p-4 font-bold text-amber-300">Stor 100+ Gmail</td><td class="p-4 text-amber-400 font-extrabold">Rp6.000</td><td class="p-4 text-right text-amber-300">Sultan</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB PLACEHOLDERS -->
+        <section id="tab-leaderboard" class="tab-content hidden space-y-6">
+            <div class="glass-card p-8 rounded-3xl text-center space-y-2">
+                <i data-lucide="trophy" class="w-12 h-12 mx-auto text-yellow-400"></i>
+                <h2 class="text-xl font-bold">Leaderboard Top Spammer</h2>
+                <p class="text-slate-400 text-sm">Fitur ini akan segera hadir!</p>
+            </div>
+        </section>
+        <section id="tab-referral" class="tab-content hidden space-y-6">
+            <div class="glass-card p-8 rounded-3xl text-center space-y-2">
+                <i data-lucide="users" class="w-12 h-12 mx-auto text-blue-400"></i>
+                <h2 class="text-xl font-bold">Sistem Referral</h2>
+                <p class="text-slate-400 text-sm">Undang teman dan dapatkan komisi. (Segera hadir)</p>
+            </div>
+        </section>
+        <section id="tab-admin" class="tab-content hidden space-y-6">
+            <div class="glass-card p-8 rounded-3xl text-center space-y-2 border border-red-500/30">
+                <i data-lucide="lock" class="w-12 h-12 mx-auto text-red-400"></i>
+                <h2 class="text-xl font-bold text-red-400">Akses Admin Ditolak</h2>
+                <p class="text-slate-400 text-sm">Hanya akun admin yang bisa mengakses halaman ini.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JAVASCRIPT SYSTEM LOGIC -->
+    <script>
+        // Init Lucide
+        lucide.createIcons();
+
+        // Variabel global
+        let isLoggedIn = false;
+        let currentUserEmail = "";
+        let currentTotalValue = 0;
+        
+        const protectedRoutes = ['dashboard', 'stor', 'harga', 'leaderboard', 'referral', 'admin'];
+
+        function switchTab(tabId) {
+            if (!isLoggedIn && protectedRoutes.includes(tabId)) {
+                alert("Akses Ditolak: Kamu harus login terlebih dahulu!");
+                tabId = 'login';
+            }
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
+        }
+
+        // Login Manual
+        function processLogin() {
+            const emailInput = document.getElementById('login-email').value;
+            if(!emailInput) return;
+            executeLogin(emailInput);
+        }
+
+        // Login via Google (MOCKUP/Simulasi)
+        function processLoginGoogle() {
+            const emailInput = document.getElementById('google-email').value;
+            const passwordInput = document.getElementById('google-password').value;
+            
+            if(passwordInput.length < 6) {
+                alert("Password harus minimal 6 karakter!");
+                return;
+            }
+            
+            if(!emailInput) return;
+            
+            alert("Pendaftaran Berhasil! Akun dan Password Anda sudah tersimpan di sistem.");
+            closeModalFirstLogin();
+            executeLogin(emailInput);
+        }
+
+        function executeLogin(email) {
+            isLoggedIn = true;
+            currentUserEmail = email;
+            document.getElementById('display-user-email').innerText = currentUserEmail;
+            
+            const navLinks = document.getElementById('nav-links');
+            navLinks.classList.remove('hidden-auth');
+            navLinks.classList.add('flex');
+            
+            document.getElementById('auth-btn-container').innerHTML = `
+                <button onclick="processLogout()" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl transition shadow-lg shadow-red-600/20">Keluar</button>
+            `;
+            switchTab('dashboard');
+        }
+
+        function processLogout() {
+            isLoggedIn = false;
+            currentUserEmail = "";
+            const navLinks = document.getElementById('nav-links');
+            navLinks.classList.add('hidden-auth');
+            navLinks.classList.remove('flex');
+            document.getElementById('auth-btn-container').innerHTML = `
+                <button onclick="switchTab('login')" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition shadow-lg shadow-blue-600/20">Masuk</button>
+            `;
+            switchTab('login');
+        }
+
+        window.onload = () => switchTab('login');
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            document.documentElement.classList.toggle('light');
+        }
+
+        function handleGoogleSignIn() {
+            // Memunculkan Pop-up simulasi Google Account dan pembuatan Password
+            document.getElementById('modal-first-login').classList.remove('hidden');
+        }
+        function closeModalFirstLogin() {
+            document.getElementById('modal-first-login').classList.add('hidden');
+        }
+
+        // --- SISTEM VALIDASI STOR & KALKULATOR HARGA & KIRIM EMAIL ---
+        const validPasswords = ["fineirga", "prabujaya", "Sgsg1122", "aass1122"];
+
+        // Live Calculator
+        document.getElementById('gmail-list').addEventListener('input', function() {
+            const text = this.value;
+            const emails = text.split('\n').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
+            const count = emails.length;
+
+            let price = 0;
+            if (count >= 100) price = 6000;
+            else if (count >= 50) price = 5500;
+            else if (count >= 20) price = 5000;
+            else if (count >= 3) price = 4500;
+
+            currentTotalValue = count * price;
+
+            document.getElementById('calc-count').innerText = `${count} Gmail`;
+            document.getElementById('calc-tier').innerText = price > 0 ? `Rp ${price.toLocaleString('id-ID')}/Akun` : 'Minimal 3 Akun';
+            document.getElementById('calc-total').innerText = `Rp ${currentTotalValue.toLocaleString('id-ID')}`;
+        });
+
+        // Submit via Fetch API
+        function handleStorSubmit(e) {
+            e.preventDefault();
+            const inputPass = document.getElementById('input-password').value.trim();
+            const eWalletDest = document.getElementById('input-ewallet').value.trim();
+            const gmailListText = document.getElementById('gmail-list').value;
+            const alertBox = document.getElementById('stor-alert');
+            const submitBtn = document.getElementById('btn-submit-stor');
+
+            const emails = gmailListText.split('\n').map(email => email.trim()).filter(email => email.length > 0);
+            const count = emails.length;
+
+            if (count < 3) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 block mt-4";
+                alertBox.innerText = "Sistem Menolak: Minimal setoran adalah 3 Akun Gmail.";
+                return;
+            }
+
+            if (!validPasswords.includes(inputPass)) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 block mt-4";
+                alertBox.innerText = "Sistem Menolak: Password tidak sesuai! Gunakan daftar password yang diizinkan.";
+                return;
+            }
+
+            submitBtn.innerText = "Mengirim Data ke Admin...";
+            submitBtn.disabled = true;
+            alertBox.classList.add('hidden');
+
+            // FETCH FORMSUBMIT
+            fetch("https://formsubmit.co/ajax/caroluscitra08@gmail.com", {
+                method: "POST",
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    _subject: `SETORAN BARU (${count} Gmail) dari ${currentUserEmail}`,
+                    Email_Pengirim: currentUserEmail,
+                    Nomor_Tujuan_Transfer: eWalletDest,
+                    Jumlah_Akun_Gmail: `${count} Akun`,
+                    Estimasi_Pendapatan: `Rp ${currentTotalValue.toLocaleString('id-ID')}`,
+                    Password_Yang_Dipakai: inputPass,
+                    Daftar_Email: gmailListText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 block mt-4";
+                alertBox.innerHTML = `<strong>Pengiriman Sukses!</strong> Data setoran dan nomor pencairan berhasil dikirim ke Admin. Kami akan memproses maksimal 1x24 jam.`;
+                
+                // Reset form
+                document.getElementById('gmail-list').value = "";
+                document.getElementById('input-password').value = "";
+                document.getElementById('input-ewallet').value = "";
+                document.getElementById('calc-count').innerText = "0 Gmail";
+                document.getElementById('calc-tier').innerText = "Rp 0";
+                document.getElementById('calc-total').innerText = "Rp 0";
+                currentTotalValue = 0;
+                
+                submitBtn.innerText = "Kirim ke Admin Sekarang";
+                submitBtn.disabled = false;
+            })
+            .catch(error => {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 block mt-4";
+                alertBox.innerText = "Gagal mengirim data. Pastikan koneksi internet Anda stabil.";
+                
+                submitBtn.innerText = "Kirim ke Admin Sekarang";
+                submitBtn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

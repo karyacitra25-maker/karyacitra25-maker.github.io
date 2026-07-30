@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="id" class="dark overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MailMX - Platform Stor Gmail Profesional & Aman</title>
+    <!-- Tailwind CSS & Lucide Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a', dark: '#030712' }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase CDN Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #030712;
+        }
+        .glass-card { 
+            background: rgba(15, 23, 42, 0.75); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }
+        .glass-card-hover {
+            transition: all 0.3s ease;
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.15);
+        }
+        .hidden-auth { display: none !important; }
+        
+        /* Sembunyikan Scrollbar Navigasi HP */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen overflow-x-hidden selection:bg-blue-600 selection:text-white">
+
+    <!-- BACKGROUND GLOW DEKORATIF -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-blue-600/10 via-indigo-600/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
+
+    <!-- NAVBAR TOP -->
+    <nav class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- LOGO BRAND -->
+            <div class="flex items-center space-x-3 shrink-0 cursor-pointer" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-blue-500/25 ring-1 ring-white/20">
+                    MX
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-blue-400 bg-clip-text text-transparent">MailMX</span>
+                    <span class="text-[9px] text-blue-400 font-semibold tracking-widest uppercase -mt-1">Pro Platform</span>
+                </div>
+            </div>
+
+            <!-- TABS NAVIGATION (RESPONSIF MOBILE SCROLLABLE) -->
+            <div id="nav-links" class="hidden-auth flex items-center space-x-1 sm:space-x-2 overflow-x-auto no-scrollbar py-1 px-2 bg-slate-900/60 border border-slate-800/80 rounded-2xl max-w-full">
+                <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="nav-tab px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap flex items-center space-x-1.5">
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('stor')" id="nav-btn-stor" class="nav-tab px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap flex items-center space-x-1.5">
+                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                    <span>Stor Gmail</span>
+                </button>
+                <button onclick="switchTab('harga')" id="nav-btn-harga" class="nav-tab px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap flex items-center space-x-1.5">
+                    <i data-lucide="tag" class="w-3.5 h-3.5"></i>
+                    <span>Daftar Harga</span>
+                </button>
+                <button onclick="switchTab('referral')" id="nav-btn-referral" class="nav-tab px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap flex items-center space-x-1.5">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                    <span>Referral Real</span>
+                </button>
+            </div>
+
+            <!-- TOMBOL AKSI HARUS DITEMPATKAN DENGAN BAIK -->
+            <div id="auth-btn-container" class="shrink-0">
+                <button onclick="switchTab('login')" class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-lg shadow-blue-600/25 transition active:scale-95">
+                    Masuk / Daftar
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT WRAPPER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- BANNER WHATSAPP CHANNEL -->
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-emerald-900/20 to-slate-900/60 border border-emerald-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+            <div class="flex items-center space-x-3.5">
+                <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20 shrink-0">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm text-emerald-300">Saluran WhatsApp Resmi MailMX</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">Dapatkan update harga terbaru, info bonus, dan respon cepat admin.</p>
+                </div>
+            </div>
+            <a href="https://whatsapp.com/channel/0029VbBfreU3QxS0kwO6jl36" target="_blank" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition text-center shadow-lg shadow-emerald-600/20 shrink-0 flex items-center justify-center space-x-2">
+                <span>Bergabung Saluran</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+
+        <!-- ==================== TAB 1: LOGIN / REGISTER DUAL TAB ==================== -->
+        <section id="tab-login" class="tab-content max-w-md mx-auto py-4 sm:py-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl border border-slate-800">
+                
+                <!-- HEADER AUTH -->
+                <div class="text-center space-y-2">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/30 text-blue-400 flex items-center justify-center mx-auto mb-3">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <h2 class="text-2xl font-extrabold tracking-tight">Akses Akun MailMX</h2>
+                    <p class="text-xs text-slate-400">Masuk dengan akun terdaftar atau buat akun baru dalam hitungan detik.</p>
+                </div>
+
+                <!-- BANNER REFERRAL (JIKA ADA LINK REF) -->
+                <div id="ref-banner" class="hidden p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-xs text-emerald-400 text-center font-medium">
+                    🎉 Kamu diundang lewat Kode Referral: <span id="ref-code-display" class="font-bold underline"></span>
+                </div>
+
+                <!-- TAB SWITCHER (MASUK / DAFTAR) -->
+                <div class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+                    <button id="btn-auth-tab-login" onclick="switchAuthMode('login')" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-blue-600 text-white shadow-md transition">
+                        Masuk (Login)
+                    </button>
+                    <button id="btn-auth-tab-reg" onclick="switchAuthMode('register')" class="flex-1 py-2.5 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition">
+                        Buat Akun Baru
+                    </button>
+                </div>
+
+                <!-- FORM 1: LOGIN (AKUN SUDAH ADA) -->
+                <form id="form-login-box" onsubmit="event.preventDefault(); processRealLogin();" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1.5">Email Terdaftar</label>
+                        <input type="email" id="login-email" required placeholder="nama@gmail.com" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1.5">Password</label>
+                        <input type="password" id="login-password" required placeholder="Ketik password Anda" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-white">
+                    </div>
+                    <button type="submit" id="btn-login-submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-xs text-white shadow-lg shadow-blue-500/30 transition uppercase tracking-wider">
+                        Masuk ke Akun
+                    </button>
+                </form>
+
+                <!-- FORM 2: BUAT AKUN BARU -->
+                <form id="form-register-box" onsubmit="event.preventDefault(); processRealRegister();" class="space-y-4 hidden">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1.5">Email Akun Google</label>
+                        <input type="email" id="reg-email" required placeholder="nama@gmail.com" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1.5">Nomor WhatsApp Aktif</label>
+                        <input type="text" id="reg-wa" required placeholder="Contoh: 08123456789" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-blue-400 block mb-1.5">Buat Password MailMX</label>
+                        <input type="password" id="reg-password" required placeholder="Minimal 6 karakter" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-white">
+                    </div>
+                    <button type="submit" id="btn-reg-submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold text-xs text-white shadow-lg shadow-emerald-500/30 transition uppercase tracking-wider">
+                        Daftar Akun Baru
+                    </button>
+                </form>
+
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: DASHBOARD USER ==================== -->
+        <section id="tab-dashboard" class="tab-content hidden space-y-6">
+            <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start space-x-3">
+                <i data-lucide="info" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+                <p class="text-xs text-amber-200/90 leading-relaxed">
+                    <strong>Informasi Penting:</strong> Pembayaran dan hasil verifikasi setoran Gmail diproses maksimal 1×24 jam langsung ke E-Wallet kamu.
+                </p>
+            </div>
+
+            <!-- CARDS SUMMARY -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass-card glass-card-hover p-5 rounded-2xl space-y-2 border-l-4 border-l-blue-500">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Akun</span>
+                    <h3 id="display-user-email" class="text-base font-bold text-white truncate">User</h3>
+                    <div class="pt-1">
+                        <span class="inline-flex items-center space-x-1 text-[10px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 font-semibold">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Status: Akun Terverifikasi</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="glass-card glass-card-hover p-5 rounded-2xl space-y-2 border-l-4 border-l-indigo-500">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kode Referral Unik</span>
+                    <h3 id="display-user-refcode" class="text-2xl font-black text-indigo-400 tracking-wider">...</h3>
+                    <p class="text-[10px] text-slate-500">Bagikan link referral untuk komisi tambahan</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl flex items-center justify-center">
+                    <button onclick="switchTab('stor')" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl transition shadow-lg shadow-blue-500/20 flex items-center justify-center space-x-2 active:scale-98">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span>Mulai Stor Gmail</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIWAYAT TABLE -->
+            <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-base text-white flex items-center space-x-2">
+                        <i data-lucide="history" class="w-4 h-4 text-blue-400"></i>
+                        <span>Riwayat Pengiriman Gmail</span>
+                    </h3>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-800/80">
+                    <table class="w-full text-left text-xs min-w-[500px]">
+                        <thead class="bg-slate-900/90 text-slate-400 border-b border-slate-800 font-semibold uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3.5">Tanggal</th>
+                                <th class="p-3.5">Jumlah Gmail</th>
+                                <th class="p-3.5">Estimasi Rp</th>
+                                <th class="p-3.5 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody" class="divide-y divide-slate-800/60 text-slate-300">
+                            <!-- Riwayat dimuat via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: FORM STOR GMAIL ==================== -->
+        <section id="tab-stor" class="tab-content hidden max-w-2xl mx-auto space-y-6">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl border border-slate-800">
+                <div class="border-b border-slate-800/80 pb-4">
+                    <h2 class="text-xl font-bold flex items-center space-x-2">
+                        <i data-lucide="send" class="w-5 h-5 text-blue-400"></i>
+                        <span>Form Stor Gmail Resmi</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Daftar akun Gmail kamu akan langsung terkirim aman ke tim admin.</p>
+                </div>
+
+                <form onsubmit="handleStorSubmit(event)" class="space-y-5">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-2">Password Gmail yang Diperbolehkan</label>
+                        <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl text-xs font-mono text-amber-400 flex flex-wrap gap-2">
+                            <span class="bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">fineirga</span>
+                            <span class="bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">prabujaya</span>
+                            <span class="bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">Sgsg1122</span>
+                            <span class="bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">aass1122</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-2">Daftar Gmail (1 Email per baris)</label>
+                        <textarea id="gmail-list" rows="6" placeholder="email1@gmail.com&#10;email2@gmail.com" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none text-slate-100" required></textarea>
+                    </div>
+
+                    <!-- KALKULATOR HASIL -->
+                    <div class="p-4 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-slate-400 block">Jumlah Akun Terdeteksi</span>
+                            <span id="calc-count" class="text-base font-bold text-blue-400">0 Gmail</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Estimasi Pendapatan (<span id="calc-tier">Rp 0</span>)</span>
+                            <span id="calc-total" class="text-lg font-black text-emerald-400">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1.5">Konfirmasi Password Gmail</label>
+                        <input type="text" id="input-password" placeholder="Ketik salah satu password di atas" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-slate-100" required>
+                    </div>
+
+                    <div class="p-5 border border-emerald-500/20 bg-emerald-500/5 rounded-2xl space-y-4">
+                        <div class="border-b border-emerald-500/20 pb-2">
+                            <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Data Pencairan E-Wallet</h4>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-300 block mb-1">Nomor WhatsApp Aktif</label>
+                            <input type="text" id="input-wa" placeholder="Contoh: 08123456789" class="w-full px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none text-white" required>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-300 block mb-1">Jenis E-wallet</label>
+                                <input type="text" id="input-ewallet-type" placeholder="DANA / GoPay / OVO" class="w-full px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none text-white" required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-300 block mb-1">Nomor E-wallet / Rekening</label>
+                                <input type="text" id="input-ewallet-number" placeholder="081234567 (A.n Anda)" class="w-full px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none text-white" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="stor-alert" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+
+                    <button type="submit" id="btn-submit-stor" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition shadow-lg shadow-blue-600/30 text-xs uppercase tracking-wider">
+                        Kirim Setoran ke Admin
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: DAFTAR HARGA ==================== -->
+        <section id="tab-harga" class="tab-content hidden space-y-6">
+            <div class="text-center max-w-xl mx-auto space-y-2">
+                <h2 class="text-2xl font-extrabold text-white">Daftar Harga Stor Gmail</h2>
+                <p class="text-xs text-slate-400">Semakin banyak setoran akun Gmail Anda, semakin tinggi komisi per akunnya!</p>
+            </div>
+
+            <div class="glass-card rounded-3xl overflow-hidden max-w-3xl mx-auto border border-slate-800 shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs min-w-[400px]">
+                        <thead class="bg-slate-900/90 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="p-4">Kategori Setor</th>
+                                <th class="p-4">Harga / Gmail</th>
+                                <th class="p-4 text-right">Status Tier</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 font-medium">
+                            <tr class="hover:bg-slate-900/40 transition"><td class="p-4 font-bold text-white">Stor 3+ Gmail</td><td class="p-4 text-emerald-400 font-extrabold text-sm">Rp4.500</td><td class="p-4 text-right"><span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full text-[10px]">Regular</span></td></tr>
+                            <tr class="hover:bg-slate-900/40 transition"><td class="p-4 font-bold text-white">Stor 20+ Gmail</td><td class="p-4 text-emerald-400 font-extrabold text-sm">Rp5.000</td><td class="p-4 text-right"><span class="bg-blue-500/20 text-blue-400 px-2.5 py-1 rounded-full text-[10px]">Medium</span></td></tr>
+                            <tr class="hover:bg-slate-900/40 transition"><td class="p-4 font-bold text-white">Stor 50+ Gmail</td><td class="p-4 text-emerald-400 font-extrabold text-sm">Rp5.500</td><td class="p-4 text-right"><span class="bg-indigo-500/20 text-indigo-400 px-2.5 py-1 rounded-full text-[10px]">Pro</span></td></tr>
+                            <tr class="hover:bg-slate-900/40 transition bg-amber-500/5"><td class="p-4 font-bold text-amber-300">Stor 100+ Gmail</td><td class="p-4 text-amber-400 font-extrabold text-sm">Rp6.000</td><td class="p-4 text-right"><span class="bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full text-[10px] font-bold">Sultan Tier</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 5: REFERRAL REAL ==================== -->
+        <section id="tab-referral" class="tab-content hidden space-y-6 max-w-2xl mx-auto">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-white">Program Referral Real</h2>
+                <p class="text-xs text-slate-400 max-w-md mx-auto">Bagikan link unik kamu. Setiap pendaftaran terdeteksi otomatis dan tersimpan di database!</p>
+            </div>
+
+            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6 text-center border border-indigo-500/20 shadow-2xl">
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Link Referral Real Anda</h3>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="real-referral-link" readonly class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-emerald-400 focus:outline-none text-center">
+                    </div>
+                    <button onclick="copyRealReferralLink()" class="mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/25 flex items-center justify-center space-x-2 mx-auto text-xs transition active:scale-95">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                        <span>Salin Link Referral</span>
+                    </button>
+                </div>
+
+                <div class="border-t border-slate-800/80 pt-6 grid grid-cols-2 gap-4">
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Total Undangan Real</span>
+                        <span id="ref-count-real" class="text-2xl font-black text-white">0 Orang</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Status Kemitraan</span>
+                        <span class="text-xs font-bold text-emerald-400">Aktif & Terverifikasi</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        lucide.createIcons();
+
+        // 1. INISIALISASI SUPABASE DATABASE
+        const SUPABASE_URL = "https://jffvmmiaisypasdjgfkp.supabase.co"; 
+        const SUPABASE_ANON_KEY = "sb_publishable_KR9PEr3_BklVu3MzpxxpRg_GsfM94rh";
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let activeRefCodeFromURL = "";
+        let currentTotalValue = 0;
+
+        // CEK SESI OTOMATIS SAAT BUKA HALAMAN (AUTO LOGIN)
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refParam = urlParams.get('ref');
+            
+            if (refParam) {
+                activeRefCodeFromURL = refParam.toUpperCase();
+                document.getElementById('ref-banner').classList.remove('hidden');
+                document.getElementById('ref-code-display').innerText = activeRefCodeFromURL;
+                switchAuthMode('register'); // Jika buka via referral -> Buka tab daftar
+            }
+
+            // Cek apakah user sudah pernah login sebelumnya
+            const savedSession = localStorage.getItem('mailmx_session');
+            if (savedSession) {
+                try {
+                    const parsedUser = JSON.parse(savedSession);
+                    // Verifikasi ulang ke database
+                    const { data } = await db.from('users').select('*').eq('id', parsedUser.id).maybeSingle();
+                    if (data) {
+                        currentUser = data;
+                        localStorage.setItem('mailmx_session', JSON.stringify(currentUser));
+                        loadDashboardData();
+                        return;
+                    }
+                } catch(e) {
+                    localStorage.removeItem('mailmx_session');
+                }
+            }
+
+            // Default jika belum login
+            switchTab('login');
+        });
+
+        // FUNGSI GANTI AUTH MODE (LOGIN vs REGISTER)
+        function switchAuthMode(mode) {
+            const formLogin = document.getElementById('form-login-box');
+            const formReg = document.getElementById('form-register-box');
+            const btnTabLogin = document.getElementById('btn-auth-tab-login');
+            const btnTabReg = document.getElementById('btn-auth-tab-reg');
+
+            if (mode === 'login') {
+                formLogin.classList.remove('hidden');
+                formReg.classList.add('hidden');
+                btnTabLogin.className = "flex-1 py-2.5 text-xs font-bold rounded-xl bg-blue-600 text-white shadow-md transition";
+                btnTabReg.className = "flex-1 py-2.5 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition";
+            } else {
+                formLogin.classList.add('hidden');
+                formReg.classList.remove('hidden');
+                btnTabLogin.className = "flex-1 py-2.5 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition";
+                btnTabReg.className = "flex-1 py-2.5 text-xs font-bold rounded-xl bg-blue-600 text-white shadow-md transition";
+            }
+        }
+
+        // FUNGSI GANTI TAB UTAMA WEBSITE
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.className = "nav-tab px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap flex items-center space-x-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50";
+            });
+
+            const activeBtn = document.getElementById('nav-btn-' + tabId);
+            if(activeBtn) {
+                activeBtn.className = "nav-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap flex items-center space-x-1.5 bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm";
+            }
+        }
+
+        // 1. PROSES LOGIN AKUN TERDAFTAR
+        async function processRealLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const btn = document.getElementById('btn-login-submit');
+
+            if (!email || !password) {
+                alert("Mohon masukkan email dan password Anda.");
+                return;
+            }
+
+            btn.innerText = "Memeriksa...";
+            btn.disabled = true;
+
+            const { data, error } = await db
+                .from('users')
+                .select('*')
+                .eq('email', email)
+                .eq('password', password)
+                .maybeSingle();
+
+            if (error) {
+                alert("Gagal terhubung ke server: " + error.message);
+                btn.innerText = "Masuk ke Akun";
+                btn.disabled = false;
+                return;
+            }
+
+            if (!data) {
+                alert("Email atau Password yang Anda masukkan SALAH!");
+                btn.innerText = "Masuk ke Akun";
+                btn.disabled = false;
+                return;
+            }
+
+            // Jika Berhasil Login
+            currentUser = data;
+            localStorage.setItem('mailmx_session', JSON.stringify(currentUser));
+            alert("Login Berhasil! Selamat datang kembali.");
+            loadDashboardData();
+        }
+
+        // 2. PROSES DAFTAR AKUN BARU
+        async function processRealRegister() {
+            const email = document.getElementById('reg-email').value.trim();
+            const wa = document.getElementById('reg-wa').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            const btn = document.getElementById('btn-reg-submit');
+
+            if (!email || !wa || !password || password.length < 6) {
+                alert("Mohon lengkapi semua data. Password minimal 6 karakter.");
+                return;
+            }
+
+            btn.innerText = "Mendaftarkan...";
+            btn.disabled = true;
+
+            // Cek apakah email sudah terdaftar sebelumnya
+            const { data: existingUser } = await db.from('users').select('id').eq('email', email).maybeSingle();
+            
+            if (existingUser) {
+                alert("Email ini sudah terdaftar! Silakan pindah ke tab 'Masuk (Login)' untuk masuk ke akun Anda.");
+                btn.innerText = "Daftar Akun Baru";
+                btn.disabled = false;
+                switchAuthMode('login');
+                document.getElementById('login-email').value = email;
+                return;
+            }
+
+            const randomCode = 'MX-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+            const { data, error } = await db
+                .from('users')
+                .insert([
+                    { 
+                        email: email, 
+                        password: password, 
+                        wa_number: wa, 
+                        referral_code: randomCode,
+                        referred_by: activeRefCodeFromURL || null
+                    }
+                ])
+                .select();
+
+            if (error) {
+                alert("Gagal mendaftar: " + error.message);
+                btn.innerText = "Daftar Akun Baru";
+                btn.disabled = false;
+            } else {
+                alert("Pendaftaran Akun Berhasil!");
+                currentUser = data[0];
+                localStorage.setItem('mailmx_session', JSON.stringify(currentUser));
+                loadDashboardData();
+            }
+        }
+
+        // TAMPILKAN DASHBOARD JIKA SUDAH AUTH
+        async function loadDashboardData() {
+            document.getElementById('display-user-email').innerText = currentUser.email;
+            document.getElementById('display-user-refcode').innerText = currentUser.referral_code;
+
+            const refLink = `${window.location.origin}${window.location.pathname}?ref=${currentUser.referral_code}`;
+            document.getElementById('real-referral-link').value = refLink;
+
+            // Hitung total referral dari DB Supabase
+            const { count, error } = await db
+                .from('users')
+                .select('*', { count: 'exact', head: true })
+                .eq('referred_by', currentUser.referral_code);
+
+            if (!error) {
+                document.getElementById('ref-count-real').innerText = `${count} Orang`;
+            }
+
+            document.getElementById('nav-links').classList.remove('hidden-auth');
+            document.getElementById('nav-links').classList.add('flex');
+            
+            document.getElementById('auth-btn-container').innerHTML = `
+                <button onclick="logout()" class="px-3.5 py-1.5 text-xs font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition">Keluar</button>
+            `;
+
+            if(currentUser.wa_number) {
+                document.getElementById('input-wa').value = currentUser.wa_number;
+            }
+
+            renderHistory();
+            switchTab('dashboard');
+        }
+
+        function logout() {
+            localStorage.removeItem('mailmx_session');
+            location.reload();
+        }
+
+        function copyRealReferralLink() {
+            const linkInput = document.getElementById('real-referral-link');
+            linkInput.select();
+            navigator.clipboard.writeText(linkInput.value);
+            alert("Link Referral berhasil disalin!");
+        }
+
+        // KALKULATOR DAN STOR FORM
+        const validPasswords = ["fineirga", "prabujaya", "Sgsg1122", "aass1122"];
+
+        document.getElementById('gmail-list').addEventListener('input', function() {
+            const text = this.value;
+            const emails = text.split('\n').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
+            const count = emails.length;
+
+            let price = 0;
+            if (count >= 100) price = 6000;
+            else if (count >= 50) price = 5500;
+            else if (count >= 20) price = 5000;
+            else if (count >= 3) price = 4500;
+
+            currentTotalValue = count * price;
+
+            document.getElementById('calc-count').innerText = `${count} Gmail`;
+            document.getElementById('calc-tier').innerText = price > 0 ? `Rp ${price.toLocaleString('id-ID')}/Akun` : 'Min 3 Akun';
+            document.getElementById('calc-total').innerText = `Rp ${currentTotalValue.toLocaleString('id-ID')}`;
+        });
+
+        function handleStorSubmit(e) {
+            e.preventDefault();
+            const inputPass = document.getElementById('input-password').value.trim();
+            const waNumber = document.getElementById('input-wa').value.trim();
+            const ewalletType = document.getElementById('input-ewallet-type').value.trim();
+            const ewalletNumber = document.getElementById('input-ewallet-number').value.trim();
+            const gmailListText = document.getElementById('gmail-list').value;
+            const alertBox = document.getElementById('stor-alert');
+            const submitBtn = document.getElementById('btn-submit-stor');
+
+            const emails = gmailListText.split('\n').map(email => email.trim()).filter(email => email.length > 0);
+            const count = emails.length;
+
+            if (count < 3) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 block mt-4";
+                alertBox.innerText = "Sistem Menolak: Minimal setoran adalah 3 Akun Gmail.";
+                return;
+            }
+
+            if (!validPasswords.includes(inputPass)) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 block mt-4";
+                alertBox.innerText = "Sistem Menolak: Password tidak sesuai!";
+                return;
+            }
+
+            submitBtn.innerText = "Mengirim Data...";
+            submitBtn.disabled = true;
+
+            fetch("https://formsubmit.co/ajax/caroluscitra08@gmail.com", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({
+                    _subject: `SETORAN (${count} Gmail) dari ${currentUser.email}`,
+                    Email_Pengirim: currentUser.email,
+                    Nomor_WhatsApp: waNumber,
+                    Jenis_E_Wallet: ewalletType,
+                    Nomor_Pembayaran: ewalletNumber,
+                    Jumlah_Akun_Gmail: `${count} Akun`,
+                    Estimasi_Pendapatan: `Rp ${currentTotalValue.toLocaleString('id-ID')}`,
+                    Password_Yang_Dipakai: inputPass,
+                    Daftar_Email: gmailListText
+                })
+            })
+            .then(res => res.json())
+            .then(() => {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 block mt-4";
+                alertBox.innerHTML = `<strong>Pengiriman Sukses!</strong> Data terkirim ke Admin. Silakan cek riwayat.`;
+                
+                const historyData = JSON.parse(localStorage.getItem('mailmx_history_' + currentUser.email)) || [];
+                const today = new Date();
+                const dateStr = today.getDate() + '/' + (today.getMonth()+1) + '/' + today.getFullYear();
+                
+                historyData.push({ date: dateStr, count: count, totalRp: `Rp ${currentTotalValue.toLocaleString('id-ID')}`, status: 'Proses' });
+                localStorage.setItem('mailmx_history_' + currentUser.email, JSON.stringify(historyData));
+                
+                renderHistory();
+                document.getElementById('gmail-list').value = "";
+                document.getElementById('input-password').value = "";
+                submitBtn.innerText = "Kirim Setoran ke Admin";
+                submitBtn.disabled = false;
+            });
+        }
+
+        function renderHistory() {
+            if(!currentUser) return;
+            const tbody = document.getElementById('history-tbody');
+            const history = JSON.parse(localStorage.getItem('mailmx_history_' + currentUser.email)) || [];
+
+            if (history.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500 italic text-xs">Belum ada riwayat setoran.</td></tr>`;
+            } else {
+                tbody.innerHTML = '';
+                [...history].reverse().forEach(item => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-900/40 transition">
+                            <td class="p-3.5 font-medium">${item.date}</td>
+                            <td class="p-3.5 font-bold">${item.count} Akun</td>
+                            <td class="p-3.5 text-emerald-400 font-extrabold">${item.totalRp}</td>
+                            <td class="p-3.5 text-right"><span class="text-[10px] bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-full border border-amber-500/20 font-semibold">${item.status}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+    </script>
+</body>
+</html>

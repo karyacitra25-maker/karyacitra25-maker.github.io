@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Utama</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+
+    <!-- ============================== -->
+    <!-- HALAMAN LOGIN / DAFTAR         -->
+    <!-- ============================== -->
+    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md">
+                    <i class="fa-solid fa-gauge-high text-white text-2xl"></i>
+                </div>
+                <h1 class="text-xl font-bold text-gray-800">Dashboard Utama</h1>
+                <p class="text-sm text-gray-500">Masuk untuk melanjutkan</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+                <!-- Tab Login / Daftar -->
+                <div class="flex bg-gray-100 rounded-lg p-1 mb-5 text-sm font-medium">
+                    <button id="tabLoginBtn" onclick="switchTab('login')" class="flex-1 py-2 rounded-md bg-white shadow text-blue-600">Masuk</button>
+                    <button id="tabRegisterBtn" onclick="switchTab('register')" class="flex-1 py-2 rounded-md text-gray-500">Daftar</button>
+                </div>
+
+                <p id="authError" class="hidden text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-4"></p>
+
+                <!-- Form Login -->
+                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase">Username</label>
+                        <input id="loginUsername" type="text" required placeholder="username kamu"
+                            class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase">Password</label>
+                        <input id="loginPassword" type="password" required placeholder="••••••••"
+                            class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition">
+                        Masuk
+                    </button>
+                </form>
+
+                <!-- Form Daftar -->
+                <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase">Username</label>
+                        <input id="regUsername" type="text" required placeholder="pilih username"
+                            class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase">Password</label>
+                        <input id="regPassword" type="password" required placeholder="min. 6 karakter"
+                            class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase">Kode Referral <span class="normal-case text-gray-400">(opsional)</span></label>
+                        <input id="regReferralCode" type="text" placeholder="mis. BUDI4F2A"
+                            class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition">
+                        Buat Akun
+                    </button>
+                </form>
+
+                <p class="text-xs text-gray-400 text-center mt-5">
+                    Demo ini menyimpan akun sementara di memori browser. Lihat langkah-langkah di bawah chat untuk menyambungkannya ke database sungguhan.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- HALAMAN DASHBOARD (SETELAH LOGIN) -->
+    <!-- ============================== -->
+    <div id="appScreen" class="hidden">
+        <nav class="bg-blue-600 text-white shadow-md p-4">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <h1 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard Utama
+                </h1>
+                <div class="flex items-center gap-3">
+                    <span id="navUsername" class="bg-blue-700 text-xs px-3 py-1 rounded-full text-blue-100"></span>
+                    <button onclick="handleLogout()" class="text-xs bg-blue-800 hover:bg-blue-900 px-3 py-1.5 rounded-full transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-4xl mx-auto p-4 md:p-6">
+
+            <!-- Welcome Card -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Selamat Datang, <span id="welcomeUsername"></span>! 👋</h2>
+                <p class="text-gray-600">Kamu berhasil masuk ke akunmu.</p>
+            </div>
+
+            <!-- Ringkasan Statistik -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold uppercase">Total Layanan</p>
+                        <p class="text-2xl font-bold text-blue-600 mt-1">12</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                        <i class="fa-solid fa-cubes text-xl"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold uppercase">Status Sistem</p>
+                        <p class="text-2xl font-bold text-emerald-600 mt-1">Aktif</p>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                        <i class="fa-solid fa-circle-check text-xl"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold uppercase">Total Referral</p>
+                        <p id="statReferralCount" class="text-2xl font-bold text-purple-600 mt-1">0</p>
+                    </div>
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-lg">
+                        <i class="fa-solid fa-user-group text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kartu Referral -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <h3 class="text-lg font-bold mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-gift text-purple-600"></i> Program Referral
+                </h3>
+                <p class="text-sm text-gray-500 mb-4">Ajak teman pakai kode/link ini. Setiap teman yang daftar pakai kodemu akan tercatat di bawah.</p>
+
+                <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                    <div class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-mono truncate" id="referralLinkBox"></div>
+                    <button onclick="copyReferralLink()" class="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition whitespace-nowrap">
+                        <i class="fa-solid fa-copy"></i> Salin Link
+                    </button>
+                </div>
+
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Kode kamu: <span id="referralCodeText" class="text-purple-600 font-mono"></span></p>
+
+                <p class="text-xs font-semibold text-gray-500 uppercase mt-4 mb-2">Teman yang bergabung</p>
+                <ul id="referralList" class="text-sm divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
+                    <!-- diisi lewat JS -->
+                </ul>
+            </div>
+
+            <!-- Area Konten Utama -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-bold mb-4 border-b pb-2">Area Kerja / Fitur Utama</h3>
+                <p class="text-gray-600 mb-4">
+                    Silakan letakkan komponen, formulir, atau fitur yang ingin kamu kembangkan di sini.
+                </p>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                    Aksi Contoh
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ==========================================================
+        // PENYIMPANAN SEMENTARA DI MEMORI (hilang saat halaman di-refresh)
+        // Untuk produksi, ganti bagian ini dengan panggilan ke backend/API kamu.
+        // ==========================================================
+        const users = {}; // { username: { password, referralCode, referredBy, referrals: [] } }
+        let currentUser = null;
+
+        function generateReferralCode(username) {
+            const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+            return username.substring(0, 4).toUpperCase() + rand;
+        }
+
+        function switchTab(tab) {
+            const loginBtn = document.getElementById('tabLoginBtn');
+            const registerBtn = document.getElementById('tabRegisterBtn');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            hideError();
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loginBtn.classList.add('bg-white', 'shadow', 'text-blue-600');
+                loginBtn.classList.remove('text-gray-500');
+                registerBtn.classList.remove('bg-white', 'shadow', 'text-blue-600');
+                registerBtn.classList.add('text-gray-500');
+            } else {
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                registerBtn.classList.add('bg-white', 'shadow', 'text-blue-600');
+                registerBtn.classList.remove('text-gray-500');
+                loginBtn.classList.remove('bg-white', 'shadow', 'text-blue-600');
+                loginBtn.classList.add('text-gray-500');
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+        function hideError() {
+            document.getElementById('authError').classList.add('hidden');
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            hideError();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const refCodeInput = document.getElementById('regReferralCode').value.trim().toUpperCase();
+
+            if (users[username]) {
+                showError('Username sudah dipakai, coba yang lain.');
+                return;
+            }
+            if (password.length < 6) {
+                showError('Password minimal 6 karakter.');
+                return;
+            }
+
+            // Cari siapa pemilik kode referral (jika ada)
+            let referredByUsername = null;
+            if (refCodeInput) {
+                referredByUsername = Object.keys(users).find(u => users[u].referralCode === refCodeInput);
+                if (!referredByUsername) {
+                    showError('Kode referral tidak ditemukan.');
+                    return;
+                }
+            }
+
+            users[username] = {
+                password,
+                referralCode: generateReferralCode(username),
+                referredBy: referredByUsername,
+                referrals: []
+            };
+
+            if (referredByUsername) {
+                users[referredByUsername].referrals.push(username);
+            }
+
+            loginAs(username);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            hideError();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            const user = users[username];
+            if (!user || user.password !== password) {
+                showError('Username atau password salah.');
+                return;
+            }
+            loginAs(username);
+        }
+
+        function loginAs(username) {
+            currentUser = username;
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            renderDashboard();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+            switchTab('login');
+        }
+
+        function renderDashboard() {
+            const user = users[currentUser];
+            document.getElementById('navUsername').textContent = currentUser;
+            document.getElementById('welcomeUsername').textContent = currentUser;
+            document.getElementById('referralCodeText').textContent = user.referralCode;
+            document.getElementById('referralLinkBox').textContent =
+                window.location.origin + window.location.pathname + '?ref=' + user.referralCode;
+            document.getElementById('statReferralCount').textContent = user.referrals.length;
+
+            const list = document.getElementById('referralList');
+            list.innerHTML = '';
+            if (user.referrals.length === 0) {
+                list.innerHTML = '<li class="px-3 py-3 text-gray-400 text-center">Belum ada teman yang bergabung</li>';
+            } else {
+                user.referrals.forEach(name => {
+                    const li = document.createElement('li');
+                    li.className = 'px-3 py-2.5 flex items-center gap-2';
+                    li.innerHTML = `<i class="fa-solid fa-circle-user text-gray-400"></i> ${name}`;
+                    list.appendChild(li);
+                });
+            }
+        }
+
+        function copyReferralLink() {
+            const text = document.getElementById('referralLinkBox').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.currentTarget;
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersalin';
+                setTimeout(() => { btn.innerHTML = original; }, 1500);
+            });
+        }
+
+        // Jika halaman dibuka lewat link referral, isi otomatis kolom kode & pindah ke tab Daftar
+        (function prefillReferralFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref');
+            if (ref) {
+                document.getElementById('regReferralCode').value = ref.toUpperCase();
+                switchTab('register');
+            }
+        })();
+    </script>
+</body>
+</html>

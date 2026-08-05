@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailMX - Panel Kontrol Admin</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#3b82f6', 600: '#2563eb' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030712; }
+        .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen p-4 sm:p-6">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- HEADER ADMIN -->
+        <div class="glass-card p-6 rounded-3xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold text-white">Panel Kelola Saldo MailMX</h1>
+                    <p class="text-xs text-slate-400">Ubah saldo user di sini, tampilan di HP pengguna akan terupdate otomatis secara real-time.</p>
+                </div>
+            </div>
+
+            <!-- SEARCH USER -->
+            <div class="w-full sm:w-auto flex items-center bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs">
+                <i class="fa-solid fa-magnifying-glass text-slate-500 mr-2"></i>
+                <input type="text" id="searchInput" onkeyup="filterUsers()" placeholder="Cari Nama / Email..." class="bg-transparent outline-none text-white w-full sm:w-48">
+            </div>
+        </div>
+
+        <!-- TABEL PENGGUNA -->
+        <div class="glass-card rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="p-5 border-b border-slate-800/80 flex justify-between items-center">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                    <i class="fa-solid fa-users text-blue-400"></i>
+                    <span>Daftar Seluruh Pengguna</span>
+                </h3>
+                <span id="userCount" class="text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full font-bold">0 User</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-900/90 text-slate-400 border-b border-slate-800 uppercase font-semibold">
+                        <tr>
+                            <th class="p-4">Pengguna</th>
+                            <th class="p-4">Saldo Saat Ini</th>
+                            <th class="p-4">Aksi Cepat (+/-)</th>
+                            <th class="p-4">Set Nominal Manual</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody" class="divide-y divide-slate-800/60 font-medium">
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-slate-500 italic">Memuat data pengguna dari Firebase...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FIREBASE INTEGRATION -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { 
+            getFirestore, collection, onSnapshot, doc, updateDoc 
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbPe4CQJP9IWzRrOMeN96c60mZe0FjVpw",
+            authDomain: "mailmx-3bf2b.firebaseapp.com",
+            projectId: "mailmx-3bf2b",
+            storageBucket: "mailmx-3bf2b.firebasestorage.app",
+            messagingSenderId: "590976503111",
+            appId: "1:590976503111:web:948f8d92b657b169115062"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allUsers = [];
+
+        // Memantau Seluruh Pengguna Secara Real-Time
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            allUsers = [];
+            snapshot.forEach((docSnap) => {
+                allUsers.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            
+            document.getElementById('userCount').textContent = `${allUsers.length} User`;
+            renderTable(allUsers);
+        });
+
+        // Render Tabel Pengguna
+        window.renderTable = function(users) {
+            const tbody = document.getElementById('userTableBody');
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-500 italic">Tidak ada pengguna ditemukan.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            users.forEach((user) => {
+                const currentBal = user.balance || 0;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/40 transition border-b border-slate-800/40";
+                
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-bold text-white text-sm">${user.name || 'Tanpa Nama'}</div>
+                        <div class="text-[11px] text-slate-400 font-mono">${user.email || user.id}</div>
+                    </td>
+                    <td class="p-4">
+                        <span class="text-emerald-400 font-black text-sm">Rp ${currentBal.toLocaleString('id-ID')}</span>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="addBalance('${user.id}', ${currentBal}, 5000)" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-emerald-300 rounded-lg text-[11px] font-bold transition">+5rb</button>
+                            <button onclick="addBalance('${user.id}', ${currentBal}, 10000)" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-emerald-300 rounded-lg text-[11px] font-bold transition">+10rb</button>
+                            <button onclick="addBalance('${user.id}', ${currentBal}, 50000)" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-emerald-300 rounded-lg text-[11px] font-bold transition">+50rb</button>
+                            <button onclick="addBalance('${user.id}', ${currentBal}, -${currentBal})" class="px-2.5 py-1 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-300 rounded-lg text-[11px] font-bold transition">Reset 0</button>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="input-${user.id}" placeholder="Isi nominal..." class="w-28 px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs outline-none text-white focus:ring-1 focus:ring-blue-500">
+                            <button onclick="setBalanceManual('${user.id}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-xs transition">Simpan</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        // Fungsi Tambah / Kurang Saldo Secara Instan
+        window.addBalance = async function(userId, currentBalance, amountToAdd) {
+            const newBalance = Math.max(0, currentBalance + amountToAdd);
+            try {
+                await updateDoc(doc(db, "users", userId), { balance: newBalance });
+            } catch (err) {
+                alert("Gagal memperbarui saldo: " + err.message);
+            }
+        };
+
+        // Fungsi Set Saldo Manual dari Input Box
+        window.setBalanceManual = async function(userId) {
+            const inputVal = document.getElementById(`input-${userId}`).value;
+            if (inputVal === "" || isNaN(inputVal)) {
+                alert("Masukkan angka nominal saldo yang valid!");
+                return;
+            }
+            
+            const newBalance = parseInt(inputVal);
+            try {
+                await updateDoc(doc(db, "users", userId), { balance: newBalance });
+                document.getElementById(`input-${userId}`).value = "";
+            } catch (err) {
+                alert("Gagal menyimpan saldo manual: " + err.message);
+            }
+        };
+
+        // Pencarian Pengguna
+        window.filterUsers = function() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allUsers.filter(u => 
+                (u.name && u.name.toLowerCase().includes(query)) || 
+                (u.email && u.email.toLowerCase().includes(query))
+            );
+            renderTable(filtered);
+        };
+    </script>
+</body>
+</html>

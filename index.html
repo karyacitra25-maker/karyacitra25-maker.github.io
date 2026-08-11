@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="id" class="dark overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Meta tags pencegah Cache agar browser user memuat versi terbaru -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>MailMX - Platform Stor Gmail Profesional</title>
+    
+    <!-- Tailwind CSS & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' },
+                        indigo: { 500: '#6366f1', 600: '#4f46e5' },
+                        emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' },
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            background-color: #020617; 
+            color: #e2e8f0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Modern Form Inputs */
+        .form-input {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            color: #f1f5f9;
+            transition: all 0.2s ease;
+        }
+        .form-input:focus {
+            background: #0f172a;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            outline: none;
+        }
+
+        /* Utilities */
+        .hidden-auth { display: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Mobile Bottom Nav System */
+        @media (max-width: 768px) {
+            #nav-links {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: rgba(2, 6, 23, 0.95);
+                backdrop-filter: blur(12px);
+                border-top: 1px solid #1e293b;
+                display: flex !important;
+                justify-content: space-around;
+                padding: 12px 8px calc(12px + env(safe-area-inset-bottom));
+                z-index: 100;
+                gap: 0;
+            }
+            body { padding-bottom: 80px; }
+            .nav-tab {
+                flex-direction: column;
+                padding: 6px;
+                gap: 4px;
+                border-radius: 12px;
+                flex: 1;
+                text-align: center;
+                background: transparent !important;
+                box-shadow: none !important;
+                color: #64748b;
+            }
+            .nav-tab.active { color: #6366f1 !important; }
+            .nav-tab.active i { transform: translateY(-2px); color: #6366f1; }
+            .nav-tab span { font-size: 0.65rem; font-weight: 600; display: block; }
+            .nav-tab i { transition: transform 0.2s; margin: 0 auto; display: block; }
+            #desktop-nav-links { display: none; }
+        }
+        
+        @media (min-width: 769px) {
+            #nav-links { display: none !important; }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[999] flex flex-col gap-3 w-[calc(100%-2rem)] max-w-sm pointer-events-none"></div>
+
+    <!-- NAVBAR -->
+    <nav class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 px-4 md:px-6 py-3.5 shadow-sm">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-envelope-open-text text-base"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-lg font-extrabold tracking-tight text-white leading-none mt-1">MailMX</span>
+                    <span class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest mt-0.5">SaaS Platform</span>
+                </div>
+            </div>
+
+            <!-- Desktop Nav Links -->
+            <div id="desktop-nav-links" class="hidden-auth hidden md:flex items-center space-x-1 p-1 bg-slate-900 border border-slate-800 rounded-2xl">
+                <button onclick="switchTab('dashboard')" id="d-nav-btn-dashboard" class="desk-nav-tab px-5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('stor')" id="d-nav-btn-stor" class="desk-nav-tab px-5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="send" class="w-4 h-4"></i><span>Stor Gmail</span>
+                </button>
+                <button onclick="switchTab('harga')" id="d-nav-btn-harga" class="desk-nav-tab px-5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="tag" class="w-4 h-4"></i><span>Harga</span>
+                </button>
+                <button onclick="switchTab('referral')" id="d-nav-btn-referral" class="desk-nav-tab px-5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="users" class="w-4 h-4"></i><span>Referral</span>
+                </button>
+            </div>
+
+            <!-- Auth/Profile Container -->
+            <div id="auth-btn-container" class="shrink-0">
+                <button onclick="switchTab('login')" class="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition shadow-lg shadow-indigo-500/25 flex items-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-right-to-bracket"></i> Masuk
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Bottom Nav -->
+    <div id="nav-links" class="hidden-auth hidden">
+        <button onclick="switchTab('dashboard')" id="m-nav-btn-dashboard" class="nav-tab">
+            <i data-lucide="layout-dashboard" class="w-5 h-5 mb-1"></i><span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('stor')" id="m-nav-btn-stor" class="nav-tab">
+            <i data-lucide="send" class="w-5 h-5 mb-1"></i><span>Stor Gmail</span>
+        </button>
+        <button onclick="switchTab('harga')" id="m-nav-btn-harga" class="nav-tab">
+            <i data-lucide="tag" class="w-5 h-5 mb-1"></i><span>Harga</span>
+        </button>
+        <button onclick="switchTab('referral')" id="m-nav-btn-referral" class="nav-tab">
+            <i data-lucide="users" class="w-5 h-5 mb-1"></i><span>Referral</span>
+        </button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 w-full max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-8 animate-fade-in">
+
+        <!-- TAB 1: LOGIN -->
+        <section id="tab-login" class="tab-content max-w-sm mx-auto py-12 md:py-20 animate-slide-up">
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2rem] space-y-8 text-center shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-70"></div>
+                
+                <div class="space-y-4">
+                    <div class="w-16 h-16 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
+                        <i class="fa-solid fa-fingerprint text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-white tracking-tight">Masuk Akun</h2>
+                    <p class="text-sm text-slate-400 leading-relaxed px-2">Akses dashboard premium MailMX. Keamanan 1 Device = 1 Akun.</p>
+                </div>
+
+                <div id="ref-banner" class="hidden p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-400 font-semibold animate-pulse">
+                    <i class="fa-solid fa-gift mr-1"></i> Anda diundang via Link Referral!
+                </div>
+
+                <button id="googleLoginBtn" onclick="handleGoogleLogin()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 font-bold py-3.5 px-4 rounded-xl transition shadow-lg text-sm group active:scale-95">
+                    <svg width="20" height="20" viewBox="0 0 48 48" class="group-hover:scale-110 transition-transform">
+                        <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/>
+                        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C34.6 6 29.6 4 24 4 16 4 9 8.4 6.3 14.7z"/>
+                        <path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9 39.5 15.9 44 24 44z"/>
+                        <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.6 5.4C41.5 35.6 44 30.2 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                    </svg>
+                    <span id="googleLoginBtnText">Lanjutkan dengan Google</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- TAB 2: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content hidden space-y-6 md:space-y-8 animate-slide-up">
+            
+            <!-- Global Banners -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex items-center gap-4">
+                    <div class="w-10 h-10 bg-amber-500/20 rounded-xl text-amber-500 flex justify-center items-center shrink-0">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-amber-400">Jadwal Penarikan</h4>
+                        <p class="text-xs text-slate-300 mt-1">OFF jam 07:00 - 16:00 WIB. Min: Rp 11.000.</p>
+                    </div>
+                </div>
+                <div class="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl flex items-center justify-between gap-4 cursor-pointer hover:bg-emerald-500/15 transition group" onclick="window.open('https://whatsapp.com/channel/0029VbBfreU3QxS0kwO6jl36', '_blank')">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-emerald-500/20 rounded-xl text-emerald-500 flex justify-center items-center shrink-0">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-emerald-400">Grup WhatsApp Resmi</h4>
+                            <p class="text-xs text-slate-300 mt-1">Info harga, bonus, & fast respon admin.</p>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500/20 group-hover:translate-x-1 transition-all">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <img id="dashboardPhoto" class="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-slate-800 object-cover shadow-lg" src="https://via.placeholder.com/150" alt="Profile">
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-950 rounded-full"></div>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">Selamat Datang,</p>
+                        <h2 class="text-2xl font-bold text-white mt-0.5"><span id="welcomeUsername">User</span> 👋</h2>
+                    </div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl flex items-center gap-2 text-xs shadow-sm">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-slate-400">Rate Update:</span>
+                    <strong class="text-white">Rp 4.500 - 6.000</strong>
+                </div>
+            </div>
+
+            <!-- Focal Point: Saldo Utama -->
+            <div class="bg-gradient-to-br from-indigo-900/50 to-slate-900 border border-indigo-500/20 p-6 md:p-8 rounded-[2rem] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+                <div class="relative z-10">
+                    <p class="text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-wallet"></i> Saldo Tersedia
+                    </p>
+                    <h3 id="statBalance" class="text-4xl md:text-5xl font-black text-white">Rp 0</h3>
+                    <p class="text-xs text-slate-400 mt-3 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-check text-indigo-400"></i> Akun terverifikasi: <span id="display-user-email" class="text-slate-300 font-medium">...</span>
+                    </p>
+                </div>
+                <button onclick="openWithdrawModal()" class="w-full md:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95 flex items-center justify-center gap-3 relative z-10">
+                    <i class="fa-solid fa-money-bill-transfer"></i> Tarik Saldo
+                </button>
+            </div>
+
+            <!-- Quick Actions Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div onclick="switchTab('stor')" class="bg-slate-900 border border-slate-800 hover:border-indigo-500/50 p-5 rounded-2xl cursor-pointer transition group flex flex-col items-start shadow-sm">
+                    <div class="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </div>
+                    <h4 class="font-bold text-sm text-white">Mulai Stor Gmail</h4>
+                    <p class="text-[11px] text-slate-400 mt-1 line-clamp-1">Input data sekarang</p>
+                </div>
+                
+                <div onclick="switchTab('harga')" class="bg-slate-900 border border-slate-800 hover:border-slate-600 p-5 rounded-2xl cursor-pointer transition group flex flex-col items-start shadow-sm">
+                    <div class="w-10 h-10 bg-slate-800 text-slate-300 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-tags"></i>
+                    </div>
+                    <h4 class="font-bold text-sm text-white">Lihat Harga</h4>
+                    <p class="text-[11px] text-slate-400 mt-1 line-clamp-1">Cek tier harga terbaru</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col items-start shadow-sm">
+                    <div class="w-10 h-10 bg-slate-800 text-slate-400 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                    <h4 class="font-bold text-sm text-white" id="qs-total-setor">0 Akun</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Total Disetor</p>
+                </div>
+
+                <!-- Dashboard Referral Dynamic UI -->
+                <div onclick="switchTab('referral')" id="qs-referral-card" class="bg-slate-900 border border-purple-500/30 p-5 rounded-2xl cursor-pointer transition group flex flex-col items-start relative overflow-hidden shadow-sm">
+                    <div class="w-10 h-10 bg-purple-500/20 text-purple-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h4 class="font-bold text-sm text-white" id="qs-ref-text">0/5 Valid</h4>
+                    <p class="text-[11px] text-purple-300 mt-1 font-semibold" id="qs-ref-subtext">Cek Referral</p>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+                <!-- Setoran -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden flex flex-col shadow-sm">
+                    <div class="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                        <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i> Riwayat Setoran
+                        </h3>
+                    </div>
+                    <div id="history-loading" class="p-6 space-y-4">
+                        <div class="h-16 bg-slate-800/50 animate-pulse rounded-xl"></div>
+                        <div class="h-16 bg-slate-800/50 animate-pulse rounded-xl"></div>
+                    </div>
+                    <div id="history-container" class="hidden flex-1 max-h-[400px] overflow-y-auto custom-scrollbar bg-slate-950/30 p-4 md:p-0">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Penarikan -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden flex flex-col shadow-sm">
+                    <div class="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                        <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                            <i class="fa-solid fa-money-bill-transfer text-emerald-400"></i> Riwayat Penarikan
+                        </h3>
+                    </div>
+                    <div id="wd-history-loading" class="p-6 space-y-4">
+                        <div class="h-16 bg-slate-800/50 animate-pulse rounded-xl"></div>
+                        <div class="h-16 bg-slate-800/50 animate-pulse rounded-xl"></div>
+                    </div>
+                    <div id="wd-history-container" class="hidden flex-1 max-h-[400px] overflow-y-auto custom-scrollbar bg-slate-950/30 p-4 md:p-0">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: STOR GMAIL -->
+        <section id="tab-stor" class="tab-content hidden animate-slide-up">
+            <div class="max-w-xl mx-auto space-y-6">
+                
+                <div class="text-center space-y-2 mb-8">
+                    <h2 class="text-2xl font-extrabold text-white">Form Stor Gmail</h2>
+                    <p class="text-sm text-slate-400">Pastikan password sesuai dengan ketentuan sistem agar validasi lancar.</p>
+                </div>
+
+                <form onsubmit="handleStorSubmit(event)" class="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-[2rem] shadow-xl space-y-6">
+                    
+                    <!-- Password Rules -->
+                    <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-3">Password Yang Diperbolehkan</label>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-slate-950 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-mono shadow-sm">fineirga</span>
+                            <span class="bg-slate-950 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-mono shadow-sm">prabujaya</span>
+                            <span class="bg-slate-950 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-mono shadow-sm">sgsg1122</span>
+                            <span class="bg-slate-950 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-mono shadow-sm">aass1122</span>
+                        </div>
+                    </div>
+
+                    <!-- Input List -->
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Daftar Gmail (1 per baris)</label>
+                        <textarea id="gmail-list" rows="6" placeholder="email1@gmail.com&#10;email2@gmail.com" class="form-input w-full px-4 py-4 rounded-2xl text-sm font-mono custom-scrollbar" required></textarea>
+                    </div>
+
+                    <!-- Dynamic Calculator -->
+                    <div class="bg-indigo-900/20 border border-indigo-500/20 p-5 rounded-2xl flex items-center justify-between shadow-inner">
+                        <div>
+                            <span class="text-[10px] text-indigo-300 font-bold uppercase tracking-wider block mb-1">Total Akun</span>
+                            <span id="calc-count" class="text-xl font-black text-indigo-400">0 Gmail</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-indigo-300 font-bold uppercase tracking-wider block mb-1">Estimasi Harga (<span id="calc-tier">Rp 0</span>)</span>
+                            <span id="calc-total" class="text-2xl font-black text-emerald-400">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Password Akun</label>
+                            <input type="text" id="input-password" placeholder="Sesuai list di atas" class="form-input w-full px-4 py-3.5 rounded-xl text-sm" required autocomplete="off">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">No. WhatsApp Aktif</label>
+                            <input type="tel" id="input-wa" placeholder="081234..." class="form-input w-full px-4 py-3.5 rounded-xl text-sm" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit-stor" class="w-full py-4 mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/25 active:scale-95 text-sm">
+                        Kirim Setoran
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB 4: HARGA -->
+        <section id="tab-harga" class="tab-content hidden animate-slide-up">
+            <div class="max-w-4xl mx-auto space-y-10">
+                <div class="text-center space-y-2">
+                    <h2 class="text-2xl font-extrabold text-white">Daftar Harga & Tiering</h2>
+                    <p class="text-sm text-slate-400">Semakin banyak setor, semakin tinggi rate yang didapat.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <!-- Tier 1 -->
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] text-center flex flex-col justify-center transition hover:border-slate-600 shadow-sm">
+                        <span class="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit mx-auto mb-5">Regular</span>
+                        <h3 class="text-3xl font-black text-white">Rp 4.500</h3>
+                        <div class="w-full h-px bg-slate-800 my-5"></div>
+                        <p class="text-sm text-slate-300 font-medium">Stor <strong class="text-white text-base">1+</strong> Gmail</p>
+                    </div>
+
+                    <!-- Tier 2 -->
+                    <div class="bg-slate-900 border border-blue-500/20 p-6 rounded-[2rem] text-center flex flex-col justify-center transition hover:border-blue-500/40 bg-gradient-to-b from-blue-900/10 to-transparent shadow-sm">
+                        <span class="bg-blue-500/20 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit mx-auto mb-5">Medium</span>
+                        <h3 class="text-3xl font-black text-white">Rp 5.000</h3>
+                        <div class="w-full h-px bg-slate-800 my-5"></div>
+                        <p class="text-sm text-slate-300 font-medium">Stor <strong class="text-white text-base">10+</strong> Gmail</p>
+                    </div>
+
+                    <!-- Tier 3 -->
+                    <div class="bg-slate-900 border border-indigo-500/30 p-6 rounded-[2rem] text-center flex flex-col justify-center transition hover:border-indigo-500/50 bg-gradient-to-b from-indigo-900/10 to-transparent relative overflow-hidden shadow-sm">
+                        <span class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit mx-auto mb-5">Pro</span>
+                        <h3 class="text-3xl font-black text-white">Rp 5.500</h3>
+                        <div class="w-full h-px bg-slate-800 my-5"></div>
+                        <p class="text-sm text-slate-300 font-medium">Stor <strong class="text-white text-base">20+</strong> Gmail</p>
+                    </div>
+
+                    <!-- Tier 4 Sultan -->
+                    <div class="bg-slate-900 border border-amber-500/40 p-6 rounded-[2rem] text-center flex flex-col justify-center transition hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 bg-gradient-to-b from-amber-900/20 to-slate-900 relative overflow-hidden">
+                        <div class="absolute top-0 inset-x-0 bg-gradient-to-r from-amber-500 to-orange-500 py-1 text-[9px] font-black text-white uppercase tracking-widest">Premium Rate</div>
+                        <span class="bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit mx-auto mt-3 mb-5">Sultan Tier</span>
+                        <h3 class="text-3xl font-black text-amber-400 drop-shadow-md">Rp 6.000</h3>
+                        <div class="w-full h-px bg-slate-800 my-5"></div>
+                        <p class="text-sm text-amber-100 font-medium">Stor <strong class="text-white text-base">30+</strong> Gmail</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: REFERRAL (DIPERBAIKI 4 LANGKAH DIKEMBALIKAN) -->
+        <section id="tab-referral" class="tab-content hidden animate-slide-up">
+            <div class="max-w-2xl mx-auto space-y-6">
+                
+                <div class="bg-slate-900 border border-purple-500/20 p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden text-center">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+                    <!-- Header -->
+                    <div class="relative z-10 space-y-3 mb-8">
+                        <div class="inline-flex w-16 h-16 rounded-full bg-purple-500/20 text-purple-400 items-center justify-center mb-2 ring-4 ring-slate-900 shadow-inner">
+                            <i class="fa-solid fa-gift text-2xl"></i>
+                        </div>
+                        <h2 class="text-3xl font-black text-white tracking-tight">PROGRAM REFERRAL</h2>
+                        <p class="text-purple-300 font-medium text-lg">Undang 5 Teman, Dapatkan <strong class="text-white">Rp300.000!</strong></p>
+                        <p class="text-[11px] text-amber-400 bg-amber-500/10 inline-block px-3 py-1.5 rounded-full border border-amber-500/20 mt-2">
+                            ⚠️ Reward Referral hanya dapat diklaim 1 kali.
+                        </p>
+                    </div>
+
+                    <!-- 4 Steps Restored Perfectly -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-left relative z-10 mb-10">
+                        <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800 hover:border-purple-500/30 transition shadow-sm">
+                            <h5 class="text-white font-bold mb-1 text-xs"><span class="text-purple-400 mr-1">①</span> Undang 5 teman</h5>
+                            <p class="text-[11px] text-slate-400">Bagikan link referral kamu kepada teman.</p>
+                        </div>
+                        <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800 hover:border-purple-500/30 transition shadow-sm">
+                            <h5 class="text-white font-bold mb-1 text-xs"><span class="text-purple-400 mr-1">②</span> Teman harus memenuhi syarat</h5>
+                            <p class="text-[11px] text-slate-400">Setiap teman harus memiliki minimal 10 Gmail Good.</p>
+                        </div>
+                        <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800 hover:border-purple-500/30 transition shadow-sm">
+                            <h5 class="text-white font-bold mb-1 text-xs"><span class="text-purple-400 mr-1">③</span> Lengkapi 5 teman valid</h5>
+                            <p class="text-[11px] text-slate-400">Setelah 5 teman memenuhi syarat, reward terbuka.</p>
+                        </div>
+                        <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800 hover:border-purple-500/30 transition shadow-sm">
+                            <h5 class="text-white font-bold mb-1 text-xs"><span class="text-purple-400 mr-1">④</span> Klaim Rp300.000</h5>
+                            <p class="text-[11px] text-slate-400">Kamu bisa klaim reward satu kali ke Saldo.</p>
+                        </div>
+                    </div>
+
+                    <!-- Visual Progress -->
+                    <div class="relative z-10 w-full max-w-sm mx-auto mb-10 bg-slate-950/50 p-6 rounded-2xl border border-slate-800">
+                        <h4 id="ref-progress-title" class="text-sm font-bold text-white mb-4">Teman Valid: 0/5</h4>
+                        
+                        <div class="flex items-center justify-between relative px-2 mb-4">
+                            <!-- Background line -->
+                            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 -z-10 rounded-full"></div>
+                            <!-- Active line -->
+                            <div id="ref-visual-line" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-purple-500 -z-10 rounded-full transition-all duration-700" style="width: 0%"></div>
+                            
+                            <!-- Nodes injected via JS -->
+                            <div id="ref-nodes" class="flex justify-between w-full"></div>
+                        </div>
+                        <p id="ref-progress-desc" class="text-[11px] text-slate-400 font-medium">Kurang 5 teman lagi untuk mendapatkan Rp300.000.</p>
+
+                        <!-- Claim Notice -->
+                        <div id="ref-claimed-notice" class="hidden mt-4 py-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold rounded-xl text-center">
+                            <div class="text-base mb-0.5">🎉 REWARD SUDAH DIKLAIM</div>
+                            <div class="text-white text-sm">Rp300.000</div>
+                            <div class="text-[10px] text-emerald-500/80 font-normal mt-1">Program referral kamu sudah selesai.</div>
+                        </div>
+
+                        <button id="btnClaimRef" onclick="claimReferralReward()" disabled class="hidden mt-4 w-full py-3.5 bg-slate-800 text-slate-500 font-bold text-sm rounded-xl transition-all cursor-not-allowed justify-center items-center gap-2">
+                            <span id="btnClaimRefText">Butuh 5 Teman Valid</span>
+                        </button>
+                    </div>
+
+                    <!-- Link Box -->
+                    <div class="relative z-10 w-full text-left">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2 ml-1">Link Referral Kamu</label>
+                        <div class="bg-slate-950 border border-slate-800 p-2 rounded-2xl flex flex-col sm:flex-row gap-2">
+                            <div id="referralLinkBox" class="flex-1 form-input rounded-xl px-4 py-3 text-xs font-mono text-purple-400 truncate flex items-center bg-slate-900 border-none">...</div>
+                            <button onclick="copyReferralLink()" class="bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold px-6 py-3 rounded-xl transition shrink-0 shadow-lg shadow-purple-600/20 active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-copy"></i> Salin Link
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Validasi -->
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-[2rem]">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Status Teman</h4>
+                    </div>
+                    
+                    <div id="referralList" class="space-y-3">
+                        <div class="p-6 text-center bg-slate-800/30 rounded-xl text-xs text-slate-500 animate-pulse italic">Memuat data referral...</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: RESULT DETAIL -->
+    <div id="userResultModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-[150] hidden items-center justify-center p-4 transition-opacity opacity-0">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-[2rem] shadow-2xl relative flex flex-col max-h-[85vh] transform scale-95 transition-transform duration-300" id="userResultModalInner">
+            <button onclick="closeUserResultModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+            <div class="p-6 border-b border-slate-800">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-indigo-400"></i> Detail Validasi
+                </h3>
+                <p id="userModalSubDate" class="text-xs text-slate-400 mt-1 font-mono"></p>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-4 gap-2 p-6 pb-2 text-center text-xs">
+                <div class="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"><span class="block text-[10px] text-slate-400 mb-1">Good</span><span id="uStatGood" class="font-bold text-emerald-400 text-sm">0</span></div>
+                <div class="p-2 bg-red-500/10 border border-red-500/20 rounded-xl"><span class="block text-[10px] text-slate-400 mb-1">Disabled</span><span id="uStatDisabled" class="font-bold text-red-400 text-sm">0</span></div>
+                <div class="p-2 bg-blue-500/10 border border-blue-500/20 rounded-xl"><span class="block text-[10px] text-slate-400 mb-1">Verif</span><span id="uStatVerif" class="font-bold text-blue-400 text-sm">0</span></div>
+                <div class="p-2 bg-slate-800/50 border border-slate-700/50 rounded-xl"><span class="block text-[10px] text-slate-400 mb-1">Not exist</span><span id="uStatNotExist" class="font-bold text-slate-300 text-sm">0</span></div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 pt-2 space-y-2" id="userModalEmailList">
+                <!-- Injected lists -->
+            </div>
+
+            <div class="p-6 pt-0">
+                <button onclick="closeUserResultModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition">Tutup Modal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: TARIK SALDO -->
+    <div id="withdrawModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-[150] hidden items-center justify-center p-4 transition-opacity opacity-0">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm p-6 rounded-[2rem] shadow-2xl relative transform scale-95 transition-transform duration-300" id="withdrawModalInner">
+            <button onclick="closeWithdrawModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-wallet text-emerald-400"></i> Tarik Saldo
+                </h3>
+            </div>
+
+            <form onsubmit="handleWithdrawSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Metode Penarikan</label>
+                    <select id="wd-wallet-type" class="form-input w-full px-4 py-3.5 rounded-xl text-sm appearance-none cursor-pointer">
+                        <option value="DANA">DANA</option>
+                        <option value="GoPay">GoPay</option>
+                        <option value="OVO">OVO</option>
+                        <option value="ShopeePay">ShopeePay</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Nomor/Rekening Tujuan</label>
+                    <input type="text" id="wd-wallet-number" placeholder="0812... (A.n Nama)" class="form-input w-full px-4 py-3.5 rounded-xl text-sm" required>
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Nominal (Min. Rp 11.000)</label>
+                    <input type="number" id="wd-amount" min="11000" placeholder="11000" class="form-input w-full px-4 py-3.5 rounded-xl text-sm" required>
+                </div>
+                <button type="submit" id="btn-submit-wd" class="w-full mt-2 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition shadow-lg shadow-emerald-600/25 active:scale-95 text-sm">
+                    Kirim Pengajuan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PROMO REFERRAL -->
+    <div id="referralPromoPopup" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-[200] hidden flex-col items-center justify-center p-4">
+        <div class="bg-slate-900 border border-purple-500/30 w-full max-w-sm p-8 rounded-[2rem] shadow-2xl relative text-center animate-slide-up">
+            <button onclick="closePromoPopup()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-16 h-16 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-5 shadow-inner">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <h3 class="text-xl font-black text-white mb-2 leading-tight">UNDANG 5 TEMAN<br><span class="text-purple-400">DAPATKAN Rp300.000!</span></h3>
+            <p class="text-xs text-slate-300 mb-6 leading-relaxed">
+                Undang 5 teman melalui link referral kamu.<br>
+                Pastikan setiap teman mencapai minimal <strong>10 Gmail Good</strong>.<br><br>
+                <span class="inline-block text-emerald-400 font-bold bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">5 TEMAN VALID = Rp300.000</span>
+            </p>
+            <p class="text-[10px] text-slate-400 mb-5">⚠️ Reward hanya dapat diklaim 1 kali.</p>
+            <button onclick="goToReferralFromPopup()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-purple-600/30 transition active:scale-95 text-sm">
+                Mulai Referral
+            </button>
+        </div>
+    </div>
+
+    <!-- FIREBASE & LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, collection, addDoc, getDocs, query, where, onSnapshot, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbPe4CQJP9IWzRrOMeN96c60mZe0FjVpw",
+            authDomain: "mailmx-3bf2b.firebaseapp.com",
+            projectId: "mailmx-3bf2b",
+            storageBucket: "mailmx-3bf2b.firebasestorage.app",
+            messagingSenderId: "590976503111",
+            appId: "1:590976503111:web:948f8d92b657b169115062"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        setPersistence(auth, browserLocalPersistence);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+        let userCurrentBalance = 0;
+        let unsubscribeUser = null;
+        let unsubscribeSubmissions = null;
+        let unsubscribeWithdrawals = null;
+        window.cachedUserSubmissions = [];
+        
+        // PENTING: Valid Password
+        const validPasswords = ["fineirga", "prabujaya", "sgsg1122", "aass1122"];
+
+        // --- UI UTILITIES --- //
+        window.showToast = function(type, message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let style = 'bg-slate-900 border-slate-700 text-slate-200';
+            let icon = '<i class="fa-solid fa-circle-info text-blue-400"></i>';
+            if (type === 'success') { style = 'bg-slate-900 border-emerald-500/30 text-white'; icon = '<i class="fa-solid fa-circle-check text-emerald-400"></i>'; }
+            if (type === 'error') { style = 'bg-slate-900 border-red-500/30 text-white'; icon = '<i class="fa-solid fa-circle-xmark text-red-400"></i>'; }
+            if (type === 'warning') { style = 'bg-slate-900 border-amber-500/30 text-white'; icon = '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>'; }
+
+            toast.className = `flex items-center gap-3 p-4 rounded-2xl shadow-xl transform transition-all duration-300 translate-y-[-100%] opacity-0 border ${style} text-sm font-medium z-[999]`;
+            toast.innerHTML = `${icon} <div class="flex-1">${message}</div>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-y-[-100%]', 'opacity-0'));
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        };
+
+        window.switchTab = function (tabId) {
+            if (!currentUser && ['dashboard', 'stor', 'referral'].includes(tabId)) tabId = 'login';
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.desk-nav-tab').forEach(btn => btn.className = "desk-nav-tab px-5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800");
+            document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+
+            const dBtn = document.getElementById('d-nav-btn-' + tabId);
+            if (dBtn) dBtn.className = "desk-nav-tab px-5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 bg-slate-800 text-white shadow-sm";
+            
+            const mBtn = document.getElementById('m-nav-btn-' + tabId);
+            if (mBtn) mBtn.classList.add('active');
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.openModal = function(id, innerId) {
+            const m = document.getElementById(id);
+            const inner = document.getElementById(innerId);
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            requestAnimationFrame(() => {
+                m.classList.remove('opacity-0');
+                inner.classList.remove('scale-95');
+            });
+        };
+
+        window.closeModal = function(id, innerId) {
+            const m = document.getElementById(id);
+            const inner = document.getElementById(innerId);
+            m.classList.add('opacity-0');
+            inner.classList.add('scale-95');
+            setTimeout(() => {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }, 300);
+        };
+
+        window.openWithdrawModal = () => openModal('withdrawModal', 'withdrawModalInner');
+        window.closeWithdrawModal = () => closeModal('withdrawModal', 'withdrawModalInner');
+        window.closePromoPopup = () => {
+            document.getElementById('referralPromoPopup').classList.add('hidden');
+            document.getElementById('referralPromoPopup').classList.remove('flex');
+        };
+        window.goToReferralFromPopup = () => { closePromoPopup(); switchTab('referral'); };
+        
+        window.openUserResultModal = function(subId) {
+            const sub = (window.cachedUserSubmissions || []).find(s => s.id === subId);
+            if (!sub) return;
+            document.getElementById('userModalSubDate').textContent = `Tgl: ${sub.createdAt ? new Date(sub.createdAt).toLocaleString('id-ID') : '-'}`;
+            let results = sub.emailResults || sub.gmailList.split('\n').map(e => e.trim()).filter(e => e.length).map(email => ({ email, status: sub.status || 'Proses' }));
+            
+            const listContainer = document.getElementById('userModalEmailList');
+            listContainer.innerHTML = '';
+            let good=0, disabled=0, verif=0, notExist=0;
+            
+            results.forEach(item => {
+                let badge = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                if(item.status === 'Good') { good++; badge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'; }
+                else if(item.status === 'Disabled') { disabled++; badge = 'bg-red-500/10 text-red-400 border-red-500/20'; }
+                else if(item.status === 'Verif') { verif++; badge = 'bg-blue-500/10 text-blue-400 border-blue-500/20'; }
+                else if(item.status === 'Not exist') { notExist++; badge = 'bg-slate-800 text-slate-400 border-slate-700'; }
+
+                listContainer.innerHTML += `
+                    <div class="flex justify-between items-center p-3 bg-slate-950/50 rounded-xl border border-slate-800/50 hover:bg-slate-800/50 transition">
+                        <span class="font-mono text-xs text-slate-300 truncate mr-2">${item.email}</span>
+                        <span class="px-2.5 py-1 rounded-md text-[10px] font-bold border ${badge} shrink-0">${item.status}</span>
+                    </div>
+                `;
+            });
+            
+            if(sub.stats) {
+                good = sub.stats.good !== undefined ? sub.stats.good : good;
+                disabled = sub.stats.disabled !== undefined ? sub.stats.disabled : disabled;
+                verif = sub.stats.verif !== undefined ? sub.stats.verif : verif;
+                notExist = sub.stats.notExist !== undefined ? sub.stats.notExist : notExist;
+            }
+            
+            document.getElementById('uStatGood').textContent = good;
+            document.getElementById('uStatDisabled').textContent = disabled;
+            document.getElementById('uStatVerif').textContent = verif;
+            document.getElementById('uStatNotExist').textContent = notExist;
+
+            openModal('userResultModal', 'userResultModalInner');
+        };
+        window.closeUserResultModal = () => closeModal('userResultModal', 'userResultModalInner');
+
+        // --- CORE LOGIC --- //
+
+        window.handleGoogleLogin = async function () {
+            const btn = document.getElementById('googleLoginBtn');
+            const btnText = document.getElementById('googleLoginBtnText');
+            btn.disabled = true;
+            btnText.textContent = "Menghubungkan Google...";
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                showToast("error", "Gagal masuk: " + err.message);
+                btn.disabled = false;
+                btnText.textContent = "Lanjutkan dengan Google";
+            }
+        };
+
+        window.handleLogout = function () {
+            if (unsubscribeUser) unsubscribeUser();
+            if (unsubscribeSubmissions) unsubscribeSubmissions();
+            if (unsubscribeWithdrawals) unsubscribeWithdrawals();
+            signOut(auth).then(() => location.reload());
+        };
+
+        window.copyReferralLink = function () {
+            const text = document.getElementById('referralLinkBox').textContent;
+            navigator.clipboard.writeText(text).then(() => showToast("success", "Link berhasil disalin!"));
+        };
+
+        function calculateRates(count) {
+            let price = count >= 30 ? 6000 : count >= 20 ? 5500 : count >= 10 ? 5000 : count >= 1 ? 4500 : 0;
+            return { price, total: count * price };
+        }        
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const refFromUrl = urlParams.get('ref');
+        if (refFromUrl) {
+            localStorage.setItem('pending_ref_code', refFromUrl);
+            const refBanner = document.getElementById('ref-banner');
+            if (refBanner) refBanner.classList.remove('hidden');
+        }
+
+        async function getDeviceFingerprint() {
+            let canvasSig = '';
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('fp-' + navigator.userAgent, 2, 2);
+                canvasSig = canvas.toDataURL();
+            } catch (e) { canvasSig = 'no-canvas'; }
+            const raw = [ navigator.userAgent, navigator.language, screen.width + 'x' + screen.height, screen.colorDepth, new Date().getTimezoneOffset(), navigator.hardwareConcurrency || '', canvasSig ].join('|');
+            const enc = new TextEncoder().encode(raw);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function hashData(text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                currentUser = null;
+                document.querySelectorAll('.hidden-auth').forEach(el => el.style.display = 'none');
+                document.getElementById('auth-btn-container').innerHTML = `
+                    <button onclick="switchTab('login')" class="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition shadow-lg flex items-center gap-2 active:scale-95"><i class="fa-solid fa-right-to-bracket"></i> Masuk</button>`;
+                window.switchTab('login');
+                return;
+            }
+
+            currentUser = user;
+            try {
+                const userRef = doc(db, "users", user.uid);
+                const snap = await getDoc(userRef);
+
+                if (!snap.exists()) {
+                    const fingerprint = await getDeviceFingerprint();
+                    const lockRef = doc(db, "deviceLocks", fingerprint);
+                    const lockSnap = await getDoc(lockRef);
+
+                    if (lockSnap.exists() && lockSnap.data().uid !== user.uid) {
+                        showToast('error', 'Perangkat ini sudah digunakan untuk mendaftar akun lain.');
+                        await signOut(auth);
+                        window.switchTab('login');
+                        return;
+                    }
+
+                    // PENTING: KEMBALIKAN IP FETCHING YANG DIMINTA
+                    let ip = null;
+                    try {
+                        const ipRes = await fetch('https://api.ipify.org?format=json');
+                        const ipData = await ipRes.json();
+                        ip = ipData.ip;
+                    } catch (e) { ip = null; }
+
+                    const refCode = localStorage.getItem('pending_ref_code');
+                    let referredBy = null;
+
+                    if (refCode && refCode !== user.uid) {
+                        try {
+                            const referrerRef = doc(db, "users", refCode);
+                            const referrerSnap = await getDoc(referrerRef);
+                            if (referrerSnap.exists()) {
+                                const referrerData = referrerSnap.data();
+                                const existingRefs = referrerData.referrals || [];
+                                if (!existingRefs.some(r => r.uid === user.uid)) {
+                                    referredBy = refCode;
+                                    await updateDoc(referrerRef, {
+                                        referrals: arrayUnion({ uid: user.uid, name: user.displayName || user.email, joinedAt: Date.now(), isValid: false, totalGood: 0, totalSubmitted: 0 })
+                                    });
+                                }
+                            }
+                        } catch (refErr) { console.warn("Referral error:", refErr); }
+                    }
+
+                    await setDoc(userRef, {
+                        name: user.displayName || user.email,
+                        email: user.email,
+                        balance: 0,
+                        referralRewardClaimed: false,
+                        referredBy: referredBy,
+                        referrals: [],
+                        ip: ip,
+                        createdAt: Date.now()
+                    });
+                    if (!lockSnap.exists()) await setDoc(lockRef, { uid: user.uid, createdAt: Date.now() });
+                    localStorage.removeItem('pending_ref_code');
+                }
+                renderDashboard(user);
+            } catch (err) {
+                console.error("Auth init error:", err);
+                renderDashboard(user);
+            }
+        });
+
+        async function renderDashboard(user) {
+            document.querySelectorAll('.hidden-auth').forEach(el => el.style.display = '');
+            
+            document.getElementById('auth-btn-container').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img class="w-8 h-8 rounded-full border border-slate-700 object-cover" src="${user.photoURL || 'https://via.placeholder.com/150'}" alt="User">
+                    <button onclick="handleLogout()" class="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-white bg-slate-900 rounded-lg border border-slate-800 transition"><i class="fa-solid fa-power-off"></i> Keluar</button>
+                </div>
+            `;
+
+            document.getElementById('display-user-email').textContent = user.email;
+            document.getElementById('welcomeUsername').textContent = (user.displayName || user.email).split(' ')[0];
+            document.getElementById('dashboardPhoto').src = user.photoURL || 'https://via.placeholder.com/150';
+            document.getElementById('referralLinkBox').textContent = `${window.location.origin}${window.location.pathname}?ref=${user.uid}`;
+
+            if (unsubscribeUser) unsubscribeUser();
+            unsubscribeUser = onSnapshot(doc(db, "users", user.uid), (snap) => {
+                if(snap.exists()) {
+                    const data = snap.data();
+                    userCurrentBalance = data.balance || 0;
+                    document.getElementById('statBalance').textContent = `Rp ${userCurrentBalance.toLocaleString('id-ID')}`;
+                    
+                    const referrals = data.referrals || [];
+                    const isClaimed = data.referralRewardClaimed === true;
+                    const validCount = referrals.filter(r => (r.totalGood || 0) >= 10).length;
+                    const cappedValid = Math.min(validCount, 5);
+
+                    // Update Dashboard Referral Card
+                    const dashRefCard = document.getElementById('qs-referral-card');
+                    if (isClaimed) {
+                        dashRefCard.className = "bg-emerald-900/20 border border-emerald-500/30 p-5 rounded-2xl cursor-pointer transition flex flex-col items-start relative overflow-hidden shadow-sm";
+                        dashRefCard.innerHTML = `
+                            <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-lg flex items-center justify-center mb-4"><i class="fa-solid fa-check-circle"></i></div>
+                            <h4 class="font-bold text-sm text-white">Selesai</h4>
+                            <p class="text-[11px] text-emerald-300 mt-1 font-semibold">Reward Diklaim</p>
+                        `;
+                    } else if (validCount >= 5) {
+                        dashRefCard.className = "bg-purple-900/20 border border-purple-500/50 p-5 rounded-2xl cursor-pointer transition flex flex-col items-start relative overflow-hidden shadow-sm animate-pulse";
+                        dashRefCard.innerHTML = `
+                            <div class="w-10 h-10 bg-purple-500 text-white rounded-lg flex items-center justify-center mb-4 shadow-lg shadow-purple-500/30"><i class="fa-solid fa-gift"></i></div>
+                            <h4 class="font-bold text-sm text-white">Reward Siap</h4>
+                            <p class="text-[11px] text-purple-300 mt-1 font-semibold">Klaim Rp300rb</p>
+                        `;
+                    } else {
+                        dashRefCard.className = "bg-slate-900 border border-purple-500/30 p-5 rounded-2xl cursor-pointer transition group flex flex-col items-start relative overflow-hidden shadow-sm hover:border-purple-500/50";
+                        dashRefCard.innerHTML = `
+                            <div class="w-10 h-10 bg-purple-500/20 text-purple-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-users"></i></div>
+                            <h4 class="font-bold text-sm text-white">${cappedValid}/5 Valid</h4>
+                            <p class="text-[11px] text-purple-300 mt-1 font-semibold">Cek Referral</p>
+                        `;
+                    }
+                    
+                    document.getElementById('ref-progress-title').innerHTML = isClaimed ? '5/5 Teman Valid 🎉' : `${cappedValid}/5 Teman Valid`;
+
+                    let nodesHTML = '';
+                    for (let i = 1; i <= 5; i++) {
+                        if (i <= cappedValid) nodesHTML += `<div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold text-xs ring-4 ring-slate-950 shadow-md"><i class="fa-solid fa-check"></i></div>`;
+                        else nodesHTML += `<div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-xs ring-4 ring-slate-950 border border-slate-700">${i}</div>`;
+                    }
+                    document.getElementById('ref-nodes').innerHTML = nodesHTML;
+                    const pct = cappedValid === 0 ? 0 : ((cappedValid - 1) / 4) * 100;
+                    document.getElementById('ref-visual-line').style.width = cappedValid === 0 ? '0%' : (cappedValid === 5 ? '100%' : `${pct}%`);
+
+                    const btnClaim = document.getElementById('btnClaimRef');
+                    const btnClaimText = document.getElementById('btnClaimRefText');
+                    const noticeClaimed = document.getElementById('ref-claimed-notice');
+                    const desc = document.getElementById('ref-progress-desc');
+
+                    if (isClaimed) {
+                        desc.classList.add('hidden');
+                        btnClaim.classList.add('hidden');
+                        noticeClaimed.classList.remove('hidden');
+                    } else if (validCount >= 5) {
+                        desc.innerHTML = "Semua persyaratan sudah terpenuhi!<br>Reward Rp300.000 siap diklaim.";
+                        btnClaim.disabled = false;
+                        btnClaim.className = "flex w-full mt-4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-purple-600/30 transition active:scale-95 justify-center items-center gap-2";
+                        btnClaimText.innerHTML = "🎁 Klaim Rp300.000";
+                        btnClaim.classList.remove('hidden');
+                        noticeClaimed.classList.add('hidden');
+                    } else {
+                        desc.innerText = `Kurang ${5 - validCount} teman lagi untuk mendapatkan Rp300.000.`;
+                        btnClaim.disabled = true;
+                        btnClaim.className = "flex w-full mt-4 py-4 bg-slate-800 text-slate-500 font-bold text-sm rounded-xl cursor-not-allowed justify-center items-center gap-2";
+                        btnClaimText.innerText = `Butuh 5 Teman Valid`;
+                        btnClaim.classList.remove('hidden');
+                        noticeClaimed.classList.add('hidden');
+                    }
+
+                    const list = document.getElementById('referralList');
+                    list.innerHTML = '';
+                    if (referrals.length === 0) {
+                        list.innerHTML = '<div class="p-6 text-center bg-slate-800/30 rounded-xl text-xs text-slate-500 italic border border-slate-800/50">Belum ada teman yang bergabung via link kamu.</div>';
+                    } else {
+                        referrals.forEach((r, idx) => {
+                            const goodCount = r.totalGood || 0;
+                            const isV = goodCount >= 10;
+                            const badge = isV ? '<span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 font-bold rounded-lg text-[10px] border border-emerald-500/20">VALID ✅</span>' 
+                                              : '<span class="px-3 py-1 bg-amber-500/10 text-amber-400 font-semibold rounded-lg text-[10px] border border-amber-500/20">PROSES ⏳</span>';
+                            
+                            list.innerHTML += `
+                                <div class="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-slate-800/50 hover:bg-slate-800/50 transition">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400"><i class="fa-solid fa-user text-sm"></i></div>
+                                        <div>
+                                            <span class="block font-bold text-white text-sm">Teman ${idx+1}</span>
+                                            <span class="text-[10px] text-slate-400">Gmail Good: <span class="${isV ? 'text-emerald-400 font-bold' : 'text-indigo-400 font-bold'}">${goodCount}/10</span></span>
+                                        </div>
+                                    </div>
+                                    ${badge}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    if (!sessionStorage.getItem('referralPopupShown') && !isClaimed) {
+                        setTimeout(() => {
+                            document.getElementById('referralPromoPopup').classList.remove('hidden');
+                            document.getElementById('referralPromoPopup').classList.add('flex');
+                            sessionStorage.setItem('referralPopupShown', 'true');
+                        }, 800);
+                    }
+                }
+            });
+
+            setupRealtimeSubmissionsListener(user.uid);
+            setupRealtimeWithdrawalsListener(user.uid);
+            window.switchTab('dashboard');
+        }
+
+        window.claimReferralReward = async function() {
+            if (!currentUser) return;
+            const btn = document.getElementById('btnClaimRef');
+            btn.disabled = true;
+            document.getElementById('btnClaimRefText').textContent = "Memproses Klaim...";
+
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) throw "User tidak ditemukan";
+                    const data = userDoc.data();
+                    
+                    if (data.referralRewardClaimed === true) throw "Reward sudah pernah diklaim sebelumnya. Maksimal klaim 1 kali.";
+                    const validCount = (data.referrals || []).filter(r => (r.totalGood || 0) >= 10).length;
+                    if (validCount < 5) throw "Belum memenuhi 5 teman valid.";
+
+                    transaction.update(userRef, {
+                        balance: (data.balance || 0) + 300000,
+                        referralRewardClaimed: true
+                    });
+                });
+                showToast("success", "🎉 Selamat! Reward Rp300.000 berhasil diklaim dan masuk ke Saldo Anda.");
+            } catch (err) {
+                showToast("error", "Gagal klaim: " + err);
+                btn.disabled = false;
+                document.getElementById('btnClaimRefText').textContent = "🎁 Klaim Rp300.000";
+            }
+        };
+
+        document.getElementById('gmail-list').addEventListener('input', function() {
+            const count = this.value.split('\n').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@')).length;
+            const { price, total } = calculateRates(count);
+            document.getElementById('calc-count').innerText = `${count} Gmail`;
+            document.getElementById('calc-tier').innerText = price > 0 ? `Rp ${price.toLocaleString('id-ID')}/Akun` : 'Min 1 Akun';
+            document.getElementById('calc-total').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        });
+
+        window.handleStorSubmit = async function (e) {
+            e.preventDefault();
+            if (!currentUser) { showToast("warning", "Silakan login terlebih dahulu!"); return; }
+
+            const inputPass = document.getElementById('input-password').value.trim();
+            const waNumber = document.getElementById('input-wa').value.trim();
+            const gmailListText = document.getElementById('gmail-list').value;
+            const btn = document.getElementById('btn-submit-stor');
+
+            const emails = gmailListText.split('\n').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
+            const count = emails.length;
+            const { total: currentTotalValue } = calculateRates(count);
+
+            if (count < 1) { showToast("error", "Minimal setoran adalah 1 Akun Gmail."); return; }
+
+            const validIdx = validPasswords.findIndex(p => p.toLowerCase() === inputPass.toLowerCase());
+            if (validIdx === -1) { 
+                showToast("error", "Password tidak sesuai dengan daftar password resmi!"); 
+                return; 
+            }
+
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
+
+            try {
+                // Jangan simpan password plaintext ke DB, simpan Hash dan Index-nya
+                const pwdHash = await hashData(inputPass.toLowerCase());
+                const emailResults = emails.map(email => ({ email: email, status: "Proses" }));
+
+                await addDoc(collection(db, "submissions"), {
+                    uid: currentUser.uid,
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || currentUser.email,
+                    waNumber: waNumber,
+                    gmailList: gmailListText,
+                    emailResults: emailResults,
+                    count: count,
+                    totalRp: currentTotalValue,
+                    passwordIndex: validIdx,
+                    passwordHash: pwdHash,
+                    status: "Proses",
+                    stats: { good: 0, disabled: 0, verif: 0, notExist: 0 },
+                    creditedRp: 0,
+                    createdAt: Date.now()
+                });
+
+                showToast("success", "Sukses! Setoran berhasil dikirim.");
+                
+                document.getElementById('gmail-list').value = "";
+                document.getElementById('input-password').value = "";
+                document.getElementById('input-wa').value = "";
+                document.getElementById('calc-count').innerText = "0 Gmail";
+                document.getElementById('calc-total').innerText = "Rp 0";
+
+                setTimeout(() => window.switchTab('dashboard'), 1500);
+
+            } catch (err) {
+                showToast("error", "Gagal mengirim: " + err.message);
+            } finally {
+                btn.innerText = "Kirim Setoran";
+                btn.disabled = false;
+            }
+        };
+
+        window.handleWithdrawSubmit = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const walletType = document.getElementById('wd-wallet-type').value;
+            const walletNum = document.getElementById('wd-wallet-number').value.trim();
+            const amount = parseInt(document.getElementById('wd-amount').value);
+            const btn = document.getElementById('btn-submit-wd');
+
+            if (isNaN(amount) || amount < 11000) { showToast("error", "Minimal penarikan saldo adalah Rp 11.000."); return; }
+            if (amount > userCurrentBalance) { showToast("error", "Saldo tidak mencukupi."); return; }
+
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "withdrawals"), {
+                    uid: currentUser.uid,
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || currentUser.email,
+                    walletType: walletType,
+                    walletNumber: walletNum,
+                    amount: amount,
+                    status: "Proses",
+                    createdAt: Date.now()
+                });
+
+                await updateDoc(doc(db, "users", currentUser.uid), { balance: userCurrentBalance - amount });
+                
+                showToast("success", "Pengajuan berhasil dikirim!");
+                document.getElementById('wd-wallet-number').value = '';
+                document.getElementById('wd-amount').value = '';
+
+                setTimeout(() => closeWithdrawModal(), 1500);
+            } catch (err) {
+                showToast("error", "Gagal: " + err.message);
+            } finally {
+                btn.innerText = "Kirim Pengajuan";
+                btn.disabled = false;
+            }
+        };
+
+        function setupRealtimeSubmissionsListener(uid) {
+            if (unsubscribeSubmissions) unsubscribeSubmissions();
+            const q = query(collection(db, "submissions"), where("uid", "==", uid));
+            
+            unsubscribeSubmissions = onSnapshot(q, (snapshot) => {
+                const submissions = [];
+                snapshot.forEach(docSnap => submissions.push({ id: docSnap.id, ...docSnap.data() }));
+                submissions.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                window.cachedUserSubmissions = submissions;
+
+                let tAcc = 0;
+                submissions.forEach(s => tAcc += (s.count || 0));
+                document.getElementById('qs-total-setor').textContent = `${tAcc} Akun`;
+
+                document.getElementById('history-loading').classList.add('hidden');
+                const container = document.getElementById('history-container');
+                container.classList.remove('hidden');
+
+                if (submissions.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs italic">Belum ada riwayat setoran.</div>`;
+                    return;
+                }
+
+                let html = '<div class="flex flex-col gap-3 p-4">';
+                submissions.forEach(item => {
+                    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID') : '-';
+                    const st = item.status || 'Proses';
+                    let badge = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                    if (st === 'Good') badge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                    if (st === 'Disabled') badge = 'bg-red-500/10 text-red-400 border-red-500/20';
+                    if (st === 'Verif') badge = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+                    if (st === 'Not exist') badge = 'bg-slate-800 text-slate-400 border-slate-700';
+
+                    html += `
+                        <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-3 hover:border-slate-700 transition cursor-pointer group" onclick="openUserResultModal('${item.id}')">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-400 font-medium">${dateStr}</span>
+                                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold border ${badge}">${st}</span>
+                            </div>
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <span class="block text-lg font-bold text-white leading-none">${item.count} <span class="text-xs font-normal text-slate-400">Akun</span></span>
+                                </div>
+                                <div class="text-right flex items-center gap-2">
+                                    <span class="text-emerald-400 font-bold text-sm">Rp ${(item.totalRp || 0).toLocaleString('id-ID')}</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-slate-600 group-hover:text-indigo-400 transition"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }, (error) => {
+                document.getElementById('history-container').innerHTML = `<div class="p-6 text-center text-red-500 font-bold bg-red-500/10 italic text-xs rounded-lg m-4 border border-red-500/20">Gagal menarik data: ${error.message}</div>`;
+            });
+        }
+
+        function setupRealtimeWithdrawalsListener(uid) {
+            if (unsubscribeWithdrawals) unsubscribeWithdrawals();
+            const q = query(collection(db, "withdrawals"), where("uid", "==", uid));
+            
+            unsubscribeWithdrawals = onSnapshot(q, (snapshot) => {
+                const withdrawals = [];
+                snapshot.forEach(docSnap => withdrawals.push({ id: docSnap.id, ...docSnap.data() }));
+                withdrawals.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                document.getElementById('wd-history-loading').classList.add('hidden');
+                const container = document.getElementById('wd-history-container');
+                container.classList.remove('hidden');
+
+                if (withdrawals.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs italic">Belum ada riwayat penarikan saldo.</div>`;
+                    return;
+                }
+
+                let html = '<div class="flex flex-col gap-3 p-4">';
+                withdrawals.forEach(item => {
+                    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID') : '-';
+                    const st = item.status || 'Proses';
+                    let badge = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                    if (st === 'Sukses') badge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                    if (st === 'Gagal') badge = 'bg-red-500/10 text-red-400 border-red-500/20';
+
+                    html += `
+                        <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-400 font-medium">${dateStr}</span>
+                                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold border ${badge}">${st}</span>
+                            </div>
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <span class="block text-sm font-bold text-white">${item.walletType || 'DANA'}</span>
+                                    <span class="block text-[11px] font-mono text-slate-400">${item.walletNumber || '-'}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-emerald-400 font-bold text-sm">Rp ${(item.amount || 0).toLocaleString('id-ID')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }, (error) => {
+                document.getElementById('wd-history-container').innerHTML = `<div class="p-6 text-center text-red-500 font-bold bg-red-500/10 italic text-xs rounded-lg m-4 border border-red-500/20">Gagal menarik data: ${error.message}</div>`;
+            });
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - MailMX</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { slate: { 850: '#151e2e', 950: '#0a0f1c' } }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { background-color: #0a0f1c; color: #f8fafc; overflow: hidden; }
+        .glass-card { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.6); border-radius: 10px; }
+        
+        .admin-nav-btn { position: relative; overflow: hidden; }
+        .admin-nav-btn.active { background: rgba(239, 68, 68, 0.1); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+        .admin-nav-btn.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #ef4444; }
+
+        /* Progress Bar Animation */
+        .progress-bar-fill { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="antialiased min-h-screen selection:bg-red-500/30 selection:text-red-200 flex flex-col">
+
+    <!-- LOGIN SCREEN ADMIN -->
+    <div id="admin-login-screen" class="min-h-screen flex items-center justify-center p-4 relative z-50 bg-slate-950">
+        <div class="fixed inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950"></div>
+        <div class="glass-card p-8 rounded-3xl space-y-8 max-w-sm w-full shadow-2xl border border-white/5 text-center">
+            <div>
+                <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto text-white shadow-lg shadow-red-500/25 mb-4">
+                    <i class="fa-solid fa-bolt text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold tracking-tight text-white">MailMX Admin</h2>
+                <p class="text-xs text-slate-400 mt-1">Sistem Pengelolaan Terpadu</p>
+            </div>
+            <p id="adminAuthError" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3"></p>
+            <button id="adminLoginBtn" onclick="handleAdminLogin()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 font-bold py-3.5 px-4 rounded-xl transition shadow-lg text-sm">
+                <i class="fa-brands fa-google text-red-500"></i>
+                <span id="adminLoginBtnText">Login Admin</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN ADMIN DASHBOARD -->
+    <div id="admin-dashboard" class="hidden min-h-screen flex-col md:flex-row bg-slate-950">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900/40 border-r border-white/5 flex flex-col shrink-0 h-screen">
+            <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-red-500/20 ring-1 ring-white/10">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <span class="block font-extrabold text-lg text-white leading-tight">MailMX</span>
+                    <span class="block text-[10px] text-red-400 font-bold tracking-widest uppercase">Workspace Admin</span>
+                </div>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto custom-scrollbar">
+                <nav class="space-y-1.5">
+                    <button onclick="switchAdminSection('home')" id="btn-sec-home" class="admin-nav-btn active w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-chart-pie w-4 text-center"></i> <span>Dashboard Utama</span></span>
+                    </button>
+                    <button onclick="switchAdminSection('submissions')" id="btn-sec-submissions" class="admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-layer-group w-4 text-center"></i> <span>Antrian Pemeriksaan</span></span>
+                        <span id="badgePendingSub" class="hidden bg-red-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                    <button onclick="switchAdminSection('users')" id="btn-sec-users" class="admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-users w-4 text-center"></i> <span>Data Pengguna</span></span>
+                    </button>
+                    <button onclick="switchAdminSection('referrals')" id="btn-sec-referrals" class="admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-network-wired w-4 text-center"></i> <span>Referral</span></span>
+                    </button>
+                    <button onclick="switchAdminSection('withdrawals')" id="btn-sec-withdrawals" class="admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-money-bill-transfer w-4 text-center"></i> <span>Penarikan Saldo</span></span>
+                        <span id="badgePendingWd" class="hidden bg-red-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-white/5">
+                <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto h-screen relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/50 via-slate-950 to-slate-950 custom-scrollbar">
+            
+            <!-- SEKSI 0: DASHBOARD UTAMA -->
+            <section id="section-home" class="admin-section p-4 sm:p-6 lg:p-8 space-y-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Ringkasan Pekerjaan Hari Ini</h1>
+                    <p class="text-xs text-slate-400 mt-1">Selesaikan antrian agar tidak menumpuk.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-card p-5 rounded-2xl border-l-4 border-l-amber-500">
+                        <p class="text-xs text-slate-400 font-bold uppercase mb-1">Pengirim Menunggu</p>
+                        <h3 class="text-3xl font-black text-white" id="dash-senders">0</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl border-l-4 border-l-blue-500">
+                        <p class="text-xs text-slate-400 font-bold uppercase mb-1">Total Data Menunggu</p>
+                        <h3 class="text-3xl font-black text-white" id="dash-total-data">0</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl border-l-4 border-l-emerald-500">
+                        <p class="text-xs text-slate-400 font-bold uppercase mb-1">Sudah Diperiksa (Draft)</p>
+                        <h3 class="text-3xl font-black text-emerald-400" id="dash-checked">0</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl border-l-4 border-l-red-500">
+                        <p class="text-xs text-slate-400 font-bold uppercase mb-1">Belum Diperiksa</p>
+                        <h3 class="text-3xl font-black text-red-400" id="dash-unchecked">0</h3>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h2 class="text-sm font-bold text-white mb-4"><i class="fa-solid fa-forward-step text-amber-500 mr-2"></i>Pekerjaan Berikutnya (Prioritas)</h2>
+                    <div id="dash-next-task" class="glass-card p-8 rounded-2xl border border-white/5 text-center text-slate-400 italic text-sm">
+                        Memuat rekomendasi tugas...
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEKSI 1: ANTRIAN & RIWAYAT (DULU SUBMISSIONS) -->
+            <section id="section-submissions" class="admin-section hidden flex flex-col h-full">
+                <!-- Header Sticky -->
+                <div class="sticky top-0 z-10 bg-slate-950/80 backdrop-blur-xl border-b border-white/5 p-4 sm:p-6 lg:px-8">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h1 class="text-xl font-bold text-white">Sistem Pemeriksaan Data</h1>
+                            <p class="text-xs text-slate-400 mt-1">Kelola dan periksa data kiriman pengguna.</p>
+                        </div>
+                        <div class="flex gap-2 bg-slate-900/80 p-1 rounded-xl border border-white/5">
+                            <button onclick="switchSubTab('pending')" id="tab-pending" class="px-4 py-2 rounded-lg text-xs font-bold transition bg-amber-500/20 text-amber-400 border border-amber-500/30">Antrian Pemeriksaan</button>
+                            <button onclick="switchSubTab('completed')" id="tab-completed" class="px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">Riwayat Selesai</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Konten Tab -->
+                <div class="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto">
+                    
+                    <!-- TAB: ANTRIAN PENDING -->
+                    <div id="view-pending" class="space-y-6">
+                        <!-- Toolbar Filter & Sort -->
+                        <div class="flex flex-col lg:flex-row justify-between gap-4 bg-slate-900/40 p-4 rounded-2xl border border-white/5">
+                            <!-- Filter Badges -->
+                            <div class="flex flex-wrap gap-2" id="antrian-filters">
+                                <button onclick="setFilterAntrian('Semua')" id="flt-Semua" class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white shadow-lg">Semua (0)</button>
+                                <button onclick="setFilterAntrian('Belum')" id="flt-Belum" class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Belum Diperiksa (0)</button>
+                                <button onclick="setFilterAntrian('Sebagian')" id="flt-Sebagian" class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Sebagian Selesai (0)</button>
+                            </div>
+                            
+                            <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                                <div class="relative flex-1 lg:w-48">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                                    <input type="text" id="searchAntrian" onkeyup="renderAntrianCards()" placeholder="Cari Nama/Email..." class="w-full pl-8 pr-4 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none text-white transition">
+                                </div>
+                                <select id="sortAntrian" onchange="renderAntrianCards()" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-amber-500 transition cursor-pointer">
+                                    <option value="terbaru">Terbaru (Mendesak)</option>
+                                    <option value="terlama">Terlama</option>
+                                    <option value="terbanyak">Data Terbanyak</option>
+                                    <option value="sedikit">Data Paling Sedikit</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Grid Cards -->
+                        <div id="antrian-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <!-- Render via JS -->
+                        </div>
+                    </div>
+
+                    <!-- TAB: RIWAYAT SELESAI -->
+                    <div id="view-completed" class="hidden space-y-4">
+                        <div class="flex justify-between items-center bg-slate-900/40 p-4 rounded-2xl border border-white/5 mb-6">
+                            <p class="text-xs text-slate-400">Data yang sudah selesai diproses. Tidak mengganggu antrian.</p>
+                            <button onclick="loadSubmissionsData()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-right"></i> Muat Ulang
+                            </button>
+                        </div>
+                        <div id="completed-container" class="space-y-4">
+                            <!-- Akordion Riwayat -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- WORKSPACE PEMROSESAN (FULLSCREEN OVERLAY) -->
+            <div id="processing-workspace" class="hidden absolute inset-0 z-50 bg-slate-950 flex-col">
+                <!-- Header -->
+                <div class="bg-slate-900 border-b border-white/10 p-4 flex justify-between items-center shrink-0">
+                    <div class="flex items-center gap-4">
+                        <button onclick="closeProcessingWorkspace()" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <span id="pw-name">Nama Pengirim</span> 
+                                <span id="pw-status-badge" class="px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-400">Status</span>
+                            </h2>
+                            <p class="text-xs text-slate-400 font-mono" id="pw-meta">email@domain.com • 13 Agustus</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="saveDraft()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition border border-white/10 shadow-lg">
+                            <i class="fa-regular fa-bookmark mr-1.5"></i> Simpan Draft (Tunda)
+                        </button>
+                        <button onclick="finishProcessing()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20">
+                            <i class="fa-solid fa-check-double mr-1.5"></i> Simpan Hasil Final
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress & Stats Area -->
+                <div class="bg-slate-900/50 p-4 border-b border-white/5 shrink-0">
+                    <div class="max-w-6xl mx-auto">
+                        <div class="flex justify-between text-xs font-bold text-slate-300 mb-2">
+                            <span>Progress Pemeriksaan</span>
+                            <span id="pw-progress-text">0 / 0 Selesai (0%)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2 mb-4 overflow-hidden border border-slate-700">
+                            <div id="pw-progress-bar" class="bg-amber-500 h-2 rounded-full progress-bar-fill" style="width: 0%"></div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-center">
+                            <div class="p-3 bg-slate-900 rounded-xl border border-white/5 shadow-inner">
+                                <span class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Total Data</span>
+                                <span id="pw-stat-total" class="font-black text-white text-lg">0</span>
+                            </div>
+                            <div class="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                                <span class="block text-[10px] text-emerald-400 uppercase font-bold mb-1">Good</span>
+                                <span id="pw-stat-good" class="font-black text-emerald-400 text-lg">0</span>
+                            </div>
+                            <div class="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+                                <span class="block text-[10px] text-red-400 uppercase font-bold mb-1">Disabled</span>
+                                <span id="pw-stat-disabled" class="font-black text-red-400 text-lg">0</span>
+                            </div>
+                            <div class="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                                <span class="block text-[10px] text-blue-400 uppercase font-bold mb-1">Verif</span>
+                                <span id="pw-stat-verif" class="font-black text-blue-400 text-lg">0</span>
+                            </div>
+                            <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                                <span class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Not Exist</span>
+                                <span id="pw-stat-notexist" class="font-black text-slate-300 text-lg">0</span>
+                            </div>
+                            <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 relative overflow-hidden">
+                                <span class="block text-[10px] text-amber-400 uppercase font-bold mb-1 relative z-10">Belum Dicek</span>
+                                <span id="pw-stat-pending" class="font-black text-amber-400 text-lg relative z-10">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Work Area -->
+                <div class="flex-1 flex flex-col md:flex-row overflow-hidden max-w-7xl mx-auto w-full p-4 gap-6">
+                    
+                    <!-- Left: Email List & Batch Actions -->
+                    <div class="flex-1 flex flex-col bg-slate-900/40 rounded-2xl border border-white/5 overflow-hidden shadow-xl">
+                        
+                        <!-- Batch Toolbar -->
+                        <div class="p-3 bg-slate-900 border-b border-white/5 flex flex-wrap justify-between items-center gap-3">
+                            <div class="flex gap-2">
+                                <button onclick="toggleCheckboxes('all')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-[11px] text-white font-bold transition">Pilih Semua</button>
+                                <button onclick="toggleCheckboxes('pending')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-[11px] text-amber-400 font-bold transition">Pilih Belum Dicek</button>
+                                <button onclick="toggleCheckboxes('none')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-[11px] text-slate-400 font-bold transition">Batal Pilih</button>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <span class="text-[10px] text-slate-500 self-center mr-2 uppercase font-bold">Aksi Batch:</span>
+                                <button onclick="applyBatch('Good')" class="w-8 h-8 rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40 transition flex items-center justify-center" title="Tandai Good"><i class="fa-solid fa-check"></i></button>
+                                <button onclick="applyBatch('Disabled')" class="w-8 h-8 rounded bg-red-500/20 text-red-400 hover:bg-red-500/40 transition flex items-center justify-center" title="Tandai Disabled"><i class="fa-solid fa-ban"></i></button>
+                                <button onclick="applyBatch('Verif')" class="w-8 h-8 rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition flex items-center justify-center" title="Tandai Verif"><i class="fa-solid fa-shield"></i></button>
+                                <button onclick="applyBatch('Not exist')" class="w-8 h-8 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 transition flex items-center justify-center" title="Tandai Not Exist"><i class="fa-solid fa-ghost"></i></button>
+                                <button onclick="applyBatch('Proses')" class="w-8 h-8 rounded bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 transition flex items-center justify-center" title="Reset (Proses)"><i class="fa-solid fa-rotate-left"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Data Table -->
+                        <div class="flex-1 overflow-y-auto custom-scrollbar p-0">
+                            <table class="w-full text-left text-xs whitespace-nowrap">
+                                <thead class="bg-slate-900 sticky top-0 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-white/5 z-10">
+                                    <tr>
+                                        <th class="p-3 w-10 text-center">#</th>
+                                        <th class="p-3">Alamat Email</th>
+                                        <th class="p-3 w-40">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pw-tbody" class="divide-y divide-white/5 text-slate-200">
+                                    <!-- Rows generated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Tools (Auto-Match) -->
+                    <div class="w-full md:w-80 flex flex-col gap-4">
+                        <div class="glass-card p-4 rounded-2xl border border-blue-500/20 shadow-xl bg-blue-900/10">
+                            <h3 class="text-sm font-bold text-blue-400 mb-2 flex items-center gap-2"><i class="fa-solid fa-bolt"></i> Auto-Match Good</h3>
+                            <p class="text-[10px] text-slate-400 mb-3 leading-relaxed">Paste hasil "Live/Good" dari checker di bawah. Sisanya akan otomatis ditandai Disabled (Sesuai sistem saat ini).</p>
+                            <textarea id="pw-automatch-input" rows="6" placeholder="Paste email di sini..." class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs font-mono text-white outline-none focus:border-blue-500 custom-scrollbar mb-3"></textarea>
+                            <button onclick="runAutoMatch()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition shadow-lg">Cocokkan Data</button>
+                        </div>
+                        
+                        <div class="glass-card p-4 rounded-2xl border border-white/5">
+                            <h3 class="text-sm font-bold text-white mb-2">Info Kiriman</h3>
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 uppercase">Kontak WA</span>
+                                    <span class="font-mono text-emerald-400" id="pw-info-wa">-</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 uppercase">Password Default</span>
+                                    <span class="font-mono text-white" id="pw-info-pass">-</span>
+                                </div>
+                                <button onclick="copyCurrentEmailsForChecker()" class="w-full mt-2 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-2 border border-white/5">
+                                    <i class="fa-solid fa-copy text-yellow-500"></i> Salin Semua untuk Checker
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEKSI LAIN (USERS, REFERRALS, WITHDRAWALS) TETAP SAMA SEPERTI ASLI -->
+            
+            <section id="section-users" class="admin-section hidden p-4 sm:p-6 lg:p-8 space-y-6">
+                <!-- (Sama dengan aslinya, hanya CSS diperbarui) -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/40 p-5 rounded-2xl border border-white/5">
+                    <div><h1 class="text-xl font-bold text-white">Database Pengguna</h1></div>
+                    <div class="flex flex-wrap gap-3">
+                        <input type="text" id="searchInput" placeholder="Cari Email/Nama..." class="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:border-red-500 focus:ring-1 outline-none text-white w-full sm:w-60 transition" onkeyup="filterTable()">
+                        <button onclick="loadUsers()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs whitespace-nowrap"><thead class="bg-slate-900/80 text-slate-400 border-b border-white/5 uppercase font-bold text-[10px]"><tr><th class="p-4">Info User</th><th class="p-4">Saldo Saat Ini</th><th class="p-4">Statistik Referral</th><th class="p-4">IP & Tgl Daftar</th><th class="p-4 text-right">Aksi</th></tr></thead><tbody id="users-tbody" class="divide-y divide-white/5 text-slate-300"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-referrals" class="admin-section hidden p-4 sm:p-6 lg:p-8 space-y-6">
+                <!-- (Sama dengan aslinya) -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/40 p-5 rounded-2xl border border-white/5">
+                    <div><h1 class="text-xl font-bold text-white">Manajemen Referral</h1></div>
+                    <button onclick="loadReferrals()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button>
+                </div>
+                <div class="glass-card rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs whitespace-nowrap"><thead class="bg-slate-900/80 text-slate-400 border-b border-white/5 uppercase font-bold text-[10px]"><tr><th class="p-4">Pengundang</th><th class="p-4">Progress Referral</th><th class="p-4">Reward Tersedia</th><th class="p-4 text-right">Aksi</th></tr></thead><tbody id="referrals-tbody" class="divide-y divide-white/5 text-slate-300"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-withdrawals" class="admin-section hidden p-4 sm:p-6 lg:p-8 space-y-6">
+                <!-- (Sama dengan aslinya) -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/40 p-5 rounded-2xl border border-white/5">
+                    <div><h1 class="text-xl font-bold text-white">Penarikan Saldo</h1></div>
+                    <button onclick="loadWithdrawals()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button>
+                </div>
+                <div class="glass-card rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs whitespace-nowrap"><thead class="bg-slate-900/80 text-slate-400 border-b border-white/5 uppercase font-bold text-[10px]"><tr><th class="p-4">Waktu</th><th class="p-4">User</th><th class="p-4">Tujuan Transfer</th><th class="p-4">Nominal</th><th class="p-4">Status</th><th class="p-4 text-right">Aksi Admin</th></tr></thead><tbody id="withdrawals-tbody" class="divide-y divide-white/5 text-slate-300"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODALS KECIL (REFERRAL & SALDO TETAP SAMA) -->
+    <!-- Modal Referral -->
+    <div id="referralDetailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[110] hidden items-center justify-center p-4">
+        <div class="glass-card max-w-2xl w-full p-6 rounded-3xl border border-slate-700 shadow-2xl relative flex flex-col max-h-[90vh]">
+            <button onclick="closeReferralModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="mb-5"><h3 class="text-lg font-bold text-white"><i class="fa-solid fa-users text-purple-400 mr-2"></i>Detail Teman Referral</h3><p id="refModalUserLabel" class="text-xs text-slate-400 mt-1 font-mono"></p></div>
+            <div class="flex-1 overflow-y-auto custom-scrollbar border border-white/5 rounded-xl bg-slate-950/50 mb-5 max-h-[50vh]">
+                <table class="w-full text-left text-xs whitespace-nowrap"><thead class="bg-slate-900 sticky top-0 text-slate-400 uppercase font-bold text-[10px]"><th class="p-4">Akun Teman</th><th class="p-4 text-center">Total Setor</th><th class="p-4 text-center">Total Good</th><th class="p-4 text-right">Status</th></thead><tbody id="refModalTbody" class="divide-y divide-white/5 text-slate-300"></tbody></table>
+            </div>
+            <button onclick="closeReferralModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Saldo -->
+    <div id="balanceModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[110] hidden items-center justify-center p-4">
+        <div class="glass-card max-w-sm w-full p-6 rounded-3xl border border-slate-700 shadow-2xl relative">
+            <button onclick="closeBalanceModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="mb-5"><h3 class="text-lg font-bold text-white"><i class="fa-solid fa-coins text-emerald-400 mr-2"></i>Kelola Saldo</h3><p id="modalUserEmail" class="text-xs text-slate-400 mt-1 font-mono truncate"></p></div>
+            <div class="space-y-4">
+                <input type="hidden" id="editUid">
+                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center"><span class="text-xs text-slate-400">Saldo Saat Ini</span><span id="modalCurrentBalance" class="text-sm font-bold text-emerald-400">Rp 0</span></div>
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase block mb-2">Aksi Pengisian</label>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <label class="cursor-pointer p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center gap-2 text-slate-300 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10 has-[:checked]:text-emerald-400 transition"><input type="radio" name="balanceMode" value="add" checked class="hidden" onchange="updateCalcPreview()"><span class="font-bold">+ Tambah</span></label>
+                        <label class="cursor-pointer p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center gap-2 text-slate-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10 has-[:checked]:text-blue-400 transition"><input type="radio" name="balanceMode" value="set" class="hidden" onchange="updateCalcPreview()"><span class="font-bold">= Timpa (Set)</span></label>
+                    </div>
+                </div>
+                <div><label class="text-[11px] font-bold text-slate-400 uppercase block mb-2">Nominal (Rp)</label><input type="number" id="editNominal" placeholder="Contoh: 15000" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white outline-none focus:border-emerald-500 transition" oninput="updateCalcPreview()"></div>
+                <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex justify-between items-center"><span class="text-[11px] font-bold text-emerald-400/70 uppercase">Estimasi Akhir</span><span id="modalPreviewBalance" class="font-black text-emerald-400 text-sm">Rp 0</span></div>
+                <button id="btnSaveBalance" onclick="saveBalance()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-sm">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- FIREBASE & LOGIC SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, query, increment, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbPe4CQJP9IWzRrOMeN96c60mZe0FjVpw",
+            authDomain: "mailmx-3bf2b.firebaseapp.com",
+            projectId: "mailmx-3bf2b",
+            storageBucket: "mailmx-3bf2b.firebasestorage.app",
+            messagingSenderId: "590976503111",
+            appId: "1:590976503111:web:948f8d92b657b169115062"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        setPersistence(auth, browserLocalPersistence);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+        const ADMIN_EMAILS = ["caroluscitra08@gmail.com"];
+
+        // State Global Data Asli
+        let allUsersData = [];
+        let allSubmissionsData = [];
+        
+        // State Sistem Antrian
+        let antrianFilterMode = 'Semua';
+        
+        // State Sistem Pemrosesan (Draft di Memori)
+        let pw = {
+            id: null,
+            uid: null,
+            originalDoc: null,
+            emails: []
+        };
+
+        // ------------- INIT & AUTH ------------- //
+        window.handleAdminLogin = async function () {
+            const btn = document.getElementById('adminLoginBtn');
+            btn.disabled = true;
+            document.getElementById('adminLoginBtnText').textContent = "Connecting...";
+            try { await signInWithPopup(auth, provider); } catch (err) {
+                document.getElementById('adminAuthError').textContent = err.message;
+                document.getElementById('adminAuthError').classList.remove('hidden');
+                btn.disabled = false;
+                document.getElementById('adminLoginBtnText').textContent = "Login Admin";
+            }
+        };
+
+        window.handleLogout = function () { signOut(auth).then(() => location.reload()); };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && ADMIN_EMAILS.includes(user.email)) {
+                document.getElementById('admin-login-screen').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                document.getElementById('admin-dashboard').classList.add('flex');
+                
+                await loadUsers();
+                await loadSubmissionsData();
+                await loadWithdrawals();
+                
+                switchAdminSection('home');
+            } else if (user) {
+                document.getElementById('adminAuthError').textContent = "Akses Ditolak!";
+                document.getElementById('adminAuthError').classList.remove('hidden');
+                await signOut(auth);
+            } else {
+                document.getElementById('admin-login-screen').classList.remove('hidden');
+                document.getElementById('admin-dashboard').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('flex');
+            }
+        });
+
+        // ------------- NAVIGATION ------------- //
+        window.switchAdminSection = function(sectionId) {
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('section-' + sectionId).classList.remove('hidden');
+            document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+                btn.className = "admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition";
+            });
+            const activeBtn = document.getElementById('btn-sec-' + sectionId);
+            if (activeBtn) activeBtn.className = "admin-nav-btn active w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition";
+            
+            if (sectionId === 'home') renderDashboard();
+        };
+
+        window.switchSubTab = function(tab) {
+            if(tab === 'pending') {
+                document.getElementById('view-pending').classList.remove('hidden');
+                document.getElementById('view-completed').classList.add('hidden');
+                document.getElementById('tab-pending').className = "px-4 py-2 rounded-lg text-xs font-bold transition bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                document.getElementById('tab-completed').className = "px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+            } else {
+                document.getElementById('view-pending').classList.add('hidden');
+                document.getElementById('view-completed').classList.remove('hidden');
+                document.getElementById('tab-completed').className = "px-4 py-2 rounded-lg text-xs font-bold transition bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                document.getElementById('tab-pending').className = "px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+            }
+        };
+
+        // ------------- LOAD CORE DATA ------------- //
+        window.loadSubmissionsData = async function() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "submissions"));
+                allSubmissionsData = [];
+                querySnapshot.forEach(docSnap => allSubmissionsData.push({ id: docSnap.id, ...docSnap.data() }));
+                
+                renderDashboard();
+                renderAntrianCards();
+                renderRiwayatSelesai();
+            } catch (err) { alert("Error loading data: " + err.message); }
+        };
+
+        // Bantuan memproses data
+        function getComputedSubState(sub) {
+            let total = 0, good = 0, disabled = 0, verif = 0, notExist = 0, proses = 0;
+            let results = sub.emailResults || [];
+            
+            if (results.length === 0 && sub.gmailList) {
+                const arr = sub.gmailList.split('\n').map(e => e.trim()).filter(e => e.length > 0);
+                total = arr.length;
+                proses = total;
+            } else {
+                total = results.length;
+                results.forEach(r => {
+                    if (r.status === 'Good') good++;
+                    else if (r.status === 'Disabled') disabled++;
+                    else if (r.status === 'Verif') verif++;
+                    else if (r.status === 'Not exist') notExist++;
+                    else proses++;
+                });
+            }
+
+            // Status Sistem
+            let sysStatus = sub.status || 'Proses';
+            let cat = 'Semua'; // Kategori Queue
+            if (sysStatus === 'Proses') {
+                if (proses === total) cat = 'Belum';
+                else cat = 'Sebagian';
+            } else {
+                cat = 'Selesai';
+            }
+
+            return { total, good, disabled, verif, notExist, proses, cat, sysStatus };
+        }
+
+        // ------------- DASHBOARD LOGIC ------------- //
+        function renderDashboard() {
+            let pendSenders = 0, pendTotalData = 0, pendChecked = 0, pendUnchecked = 0;
+            let nextTask = null;
+
+            allSubmissionsData.forEach(sub => {
+                const state = getComputedSubState(sub);
+                if (state.cat !== 'Selesai') {
+                    pendSenders++;
+                    pendTotalData += state.total;
+                    pendUnchecked += state.proses;
+                    pendChecked += (state.total - state.proses);
+
+                    if (!nextTask || (sub.createdAt < nextTask.createdAt)) {
+                        nextTask = sub; // Paling lama prioritas
+                    }
+                }
+            });
+
+            document.getElementById('dash-senders').textContent = pendSenders;
+            document.getElementById('dash-total-data').textContent = pendTotalData.toLocaleString('id-ID');
+            document.getElementById('dash-checked').textContent = pendChecked.toLocaleString('id-ID');
+            document.getElementById('dash-unchecked').textContent = pendUnchecked.toLocaleString('id-ID');
+            
+            const badge = document.getElementById('badgePendingSub');
+            if(pendSenders > 0) { badge.textContent = pendSenders; badge.classList.remove('hidden'); }
+            else { badge.classList.add('hidden'); }
+
+            const nextDiv = document.getElementById('dash-next-task');
+            if (nextTask) {
+                const tState = getComputedSubState(nextTask);
+                nextDiv.className = "glass-card p-6 rounded-2xl border border-amber-500/30 bg-amber-900/10 text-left flex justify-between items-center";
+                nextDiv.innerHTML = `
+                    <div>
+                        <h3 class="text-white font-bold text-lg">${nextTask.userName || 'User'}</h3>
+                        <p class="text-xs text-amber-400 mt-1">${tState.total} Data • ${tState.proses} Belum diperiksa</p>
+                    </div>
+                    <button onclick="switchAdminSection('submissions'); openProcessingWorkspace('${nextTask.id}')" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-sm font-bold transition shadow-lg shadow-amber-600/20">
+                        Mulai Pemeriksaan
+                    </button>
+                `;
+            } else {
+                nextDiv.className = "glass-card p-8 rounded-2xl border border-white/5 text-center text-slate-400 italic text-sm";
+                nextDiv.innerHTML = "🎉 Luar biasa! Tidak ada antrian pekerjaan saat ini.";
+            }
+        }
+
+        // ------------- ANTRIAN PEMERIKSAAN LOGIC ------------- //
+        window.setFilterAntrian = function(mode) {
+            antrianFilterMode = mode;
+            ['Semua', 'Belum', 'Sebagian'].forEach(m => {
+                const btn = document.getElementById('flt-'+m);
+                if(m === mode) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white shadow-lg";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
+                }
+            });
+            renderAntrianCards();
+        };
+
+        window.renderAntrianCards = function() {
+            const grid = document.getElementById('antrian-grid');
+            const search = document.getElementById('searchAntrian').value.toLowerCase();
+            const sortVal = document.getElementById('sortAntrian').value;
+
+            let cSemua = 0, cBelum = 0, cSebagian = 0;
+            let displayList = [];
+
+            allSubmissionsData.forEach(sub => {
+                const state = getComputedSubState(sub);
+                sub._state = state; // cache
+                
+                if (state.cat !== 'Selesai') {
+                    cSemua++;
+                    if (state.cat === 'Belum') cBelum++;
+                    if (state.cat === 'Sebagian') cSebagian++;
+
+                    let matchSearch = true;
+                    if(search) {
+                        const str = `${sub.userName} ${sub.userEmail} ${sub.id}`.toLowerCase();
+                        matchSearch = str.includes(search);
+                    }
+
+                    if (matchSearch && (antrianFilterMode === 'Semua' || antrianFilterMode === state.cat)) {
+                        displayList.push(sub);
+                    }
+                }
+            });
+
+            document.getElementById('flt-Semua').textContent = `Semua (${cSemua})`;
+            document.getElementById('flt-Belum').textContent = `Belum Diperiksa (${cBelum})`;
+            document.getElementById('flt-Sebagian').textContent = `Sebagian Selesai (${cSebagian})`;
+
+            // Sort
+            displayList.sort((a, b) => {
+                if (sortVal === 'terbaru') return (b.createdAt || 0) - (a.createdAt || 0);
+                if (sortVal === 'terlama') return (a.createdAt || 0) - (b.createdAt || 0);
+                if (sortVal === 'terbanyak') return b._state.total - a._state.total;
+                if (sortVal === 'sedikit') return a._state.total - b._state.total;
+                return 0;
+            });
+
+            grid.innerHTML = '';
+            if (displayList.length === 0) {
+                grid.innerHTML = '<div class="col-span-full p-8 text-center text-slate-500 italic border border-dashed border-slate-700 rounded-2xl">Tidak ada data yang cocok.</div>';
+                return;
+            }
+
+            displayList.forEach(sub => {
+                const s = sub._state;
+                const dateStr = sub.createdAt ? new Date(sub.createdAt).toLocaleDateString('id-ID', {day:'numeric', month:'long'}) : '-';
+                
+                let badge = s.cat === 'Sebagian' 
+                    ? `<span class="px-2 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded font-bold">DRAFT</span>`
+                    : `<span class="px-2 py-0.5 text-[10px] bg-slate-800 text-slate-400 border border-slate-700 rounded font-bold">BARU</span>`;
+
+                const btnText = s.cat === 'Sebagian' ? "Lanjutkan" : "Periksa";
+                
+                grid.innerHTML += `
+                    <div class="glass-card p-5 rounded-2xl border border-white/5 flex flex-col justify-between hover:border-amber-500/30 transition shadow-lg">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="text-sm font-bold text-white truncate max-w-[150px]">${sub.userName || 'User'}</h3>
+                                    <p class="text-[10px] text-slate-500">Dikirim: ${dateStr}</p>
+                                </div>
+                                ${badge}
+                            </div>
+                            <div class="mb-4">
+                                <span class="block text-xl font-black text-white">${s.total} <span class="text-xs font-normal text-slate-400">Data</span></span>
+                                <span class="block text-[11px] text-amber-400 mt-1 font-semibold">${s.good} Good • ${s.proses} Belum diperiksa</span>
+                            </div>
+                        </div>
+                        <button onclick="openProcessingWorkspace('${sub.id}')" class="w-full py-2 bg-white hover:bg-slate-200 text-slate-900 rounded-xl text-xs font-bold transition shadow-lg">
+                            ${btnText}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // ------------- WORKSPACE PEMROSESAN LOGIC ------------- //
+        window.openProcessingWorkspace = function(id) {
+            const sub = allSubmissionsData.find(s => s.id === id);
+            if (!sub) return;
+
+            // Copy to memori
+            pw.id = sub.id;
+            pw.uid = sub.uid;
+            pw.originalDoc = sub;
+            
+            // Generate list jika belum ada emailResults (backward compatibility)
+            let rawList = sub.emailResults || [];
+            if (rawList.length === 0 && sub.gmailList) {
+                rawList = sub.gmailList.split('\n').map(e => e.trim()).filter(e => e.length > 0).map(em => ({
+                    email: em, status: 'Proses'
+                }));
+            }
+            // Deep copy agar tidak ngerusak original state sebelum disave
+            pw.emails = JSON.parse(JSON.stringify(rawList));
+
+            // Set UI Meta
+            document.getElementById('pw-name').textContent = sub.userName;
+            const dateStr = sub.createdAt ? new Date(sub.createdAt).toLocaleDateString('id-ID', {day:'numeric', month:'long'}) : '-';
+            document.getElementById('pw-meta').textContent = `${sub.userEmail} • ${dateStr}`;
+            document.getElementById('pw-info-wa').textContent = sub.waNumber || '-';
+            document.getElementById('pw-info-pass').textContent = sub.password || '-';
+            
+            document.getElementById('pw-status-badge').textContent = getComputedSubState(sub).cat === 'Sebagian' ? 'Draft Ditemukan' : 'Mulai Baru';
+            
+            document.getElementById('pw-automatch-input').value = '';
+            
+            renderWorkspaceCore();
+
+            document.getElementById('processing-workspace').classList.remove('hidden');
+            document.getElementById('processing-workspace').classList.add('flex');
+        };
+
+        window.closeProcessingWorkspace = function() {
+            if(confirm("Keluar tanpa menyimpan? Pastikan Anda sudah klik 'Simpan Draft' jika ada perubahan.")) {
+                document.getElementById('processing-workspace').classList.add('hidden');
+                document.getElementById('processing-workspace').classList.remove('flex');
+            }
+        };
+
+        function renderWorkspaceCore() {
+            let total = pw.emails.length;
+            let good = 0, disabled = 0, verif = 0, notExist = 0, proses = 0;
+            
+            const tbody = document.getElementById('pw-tbody');
+            tbody.innerHTML = '';
+
+            pw.emails.forEach((item, index) => {
+                if (item.status === 'Good') good++;
+                else if (item.status === 'Disabled') disabled++;
+                else if (item.status === 'Verif') verif++;
+                else if (item.status === 'Not exist') notExist++;
+                else { item.status = 'Proses'; proses++; }
+
+                // Warna Dropdown
+                let selectClass = "w-full px-2 py-1.5 border rounded-lg text-xs font-semibold outline-none transition ";
+                if(item.status === 'Good') selectClass += "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+                else if(item.status === 'Disabled') selectClass += "bg-red-500/10 text-red-400 border-red-500/30";
+                else if(item.status === 'Verif') selectClass += "bg-blue-500/10 text-blue-400 border-blue-500/30";
+                else if(item.status === 'Not exist') selectClass += "bg-slate-800 text-slate-300 border-slate-700";
+                else selectClass += "bg-amber-500/10 text-amber-400 border-amber-500/30";
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition border-b border-white/5 group">
+                        <td class="p-3 text-center"><input type="checkbox" class="pw-cb accent-amber-500 rounded border-slate-700 bg-slate-900 w-4 h-4 cursor-pointer" data-idx="${index}"></td>
+                        <td class="p-3 font-mono text-slate-300 text-xs">${item.email}</td>
+                        <td class="p-3">
+                            <select onchange="updateSingleStatus(${index}, this.value)" class="${selectClass}">
+                                <option value="Proses" class="bg-slate-900 text-white" ${item.status === 'Proses'?'selected':''}>Proses</option>
+                                <option value="Good" class="bg-slate-900 text-emerald-400" ${item.status === 'Good'?'selected':''}>Good</option>
+                                <option value="Disabled" class="bg-slate-900 text-red-400" ${item.status === 'Disabled'?'selected':''}>Disabled</option>
+                                <option value="Verif" class="bg-slate-900 text-blue-400" ${item.status === 'Verif'?'selected':''}>Verif</option>
+                                <option value="Not exist" class="bg-slate-900 text-slate-300" ${item.status === 'Not exist'?'selected':''}>Not exist</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Update Stats Display
+            document.getElementById('pw-stat-total').textContent = total;
+            document.getElementById('pw-stat-good').textContent = good;
+            document.getElementById('pw-stat-disabled').textContent = disabled;
+            document.getElementById('pw-stat-verif').textContent = verif;
+            document.getElementById('pw-stat-notexist').textContent = notExist;
+            document.getElementById('pw-stat-pending').textContent = proses;
+
+            let checkedCount = total - proses;
+            let percent = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
+            document.getElementById('pw-progress-text').textContent = `${checkedCount} / ${total} Selesai (${percent}%)`;
+            document.getElementById('pw-progress-bar').style.width = percent + '%';
+            if(percent === 100) document.getElementById('pw-progress-bar').classList.replace('bg-amber-500', 'bg-emerald-500');
+            else document.getElementById('pw-progress-bar').classList.replace('bg-emerald-500', 'bg-amber-500');
+        }
+
+        window.updateSingleStatus = function(idx, val) {
+            pw.emails[idx].status = val;
+            renderWorkspaceCore();
+        };
+
+        window.toggleCheckboxes = function(mode) {
+            const cbs = document.querySelectorAll('.pw-cb');
+            cbs.forEach(cb => {
+                const idx = cb.getAttribute('data-idx');
+                if (mode === 'all') cb.checked = true;
+                else if (mode === 'none') cb.checked = false;
+                else if (mode === 'pending') {
+                    cb.checked = pw.emails[idx].status === 'Proses';
+                }
+            });
+        };
+
+        window.applyBatch = function(status) {
+            const cbs = document.querySelectorAll('.pw-cb:checked');
+            if(cbs.length === 0) return alert("Pilih minimal 1 data terlebih dahulu!");
+            cbs.forEach(cb => {
+                const idx = cb.getAttribute('data-idx');
+                pw.emails[idx].status = status;
+            });
+            renderWorkspaceCore();
+        };
+
+        window.runAutoMatch = function() {
+            const text = document.getElementById('pw-automatch-input').value;
+            if(!text.trim()) return alert("Paste daftar email yang Live (Good) dari checker terlebih dahulu!");
+            
+            const goodEmails = text.toLowerCase().split('\n').map(e => e.trim()).filter(e => e.length > 0);
+            let matched = 0;
+            
+            pw.emails.forEach(item => {
+                if (goodEmails.includes(item.email.toLowerCase())) {
+                    item.status = "Good";
+                    matched++;
+                } else {
+                    item.status = "Disabled"; // Sesuai instruksi: Sisanya logika asli (Disabled)
+                }
+            });
+            
+            renderWorkspaceCore();
+            alert(`Auto-Match Selesai!\nBerhasil dicocokkan (Good): ${matched}\nSisanya ditandai Disabled.`);
+        };
+
+        window.copyCurrentEmailsForChecker = async function() {
+            const text = pw.emails.map(e => e.email).join('\n');
+            try {
+                await navigator.clipboard.writeText(text);
+                alert("Daftar email berhasil disalin!");
+            } catch(e) { alert("Gagal menyalin."); }
+        };
+
+        // --- SISTEM SIMPAN (DRAFT & FINAL) ---
+
+        function calculateCurrentStats() {
+            let good = 0, disabled = 0, verif = 0, notExist = 0;
+            pw.emails.forEach(item => {
+                if (item.status === 'Good') good++;
+                else if (item.status === 'Disabled') disabled++;
+                else if (item.status === 'Verif') verif++;
+                else if (item.status === 'Not exist') notExist++;
+            });
+            return { good, disabled, verif, notExist };
+        }
+
+        window.saveDraft = async function() {
+            if(!pw.id) return;
+            try {
+                const stats = calculateCurrentStats();
+                const subRef = doc(db, "submissions", pw.id);
+                // Simpan emailResults, tapi biarkan status utama = "Proses"
+                await updateDoc(subRef, {
+                    emailResults: pw.emails,
+                    stats: stats
+                });
+                alert("Draft berhasil disimpan. Anda bisa melanjutkan nanti.");
+                document.getElementById('processing-workspace').classList.add('hidden');
+                document.getElementById('processing-workspace').classList.remove('flex');
+                await loadSubmissionsData(); // Refresh UI
+            } catch (err) { alert("Gagal menyimpan draft: " + err.message); }
+        };
+
+        window.finishProcessing = async function() {
+            if(!pw.id) return;
+            
+            const unhandled = pw.emails.filter(e => e.status === 'Proses').length;
+            if(unhandled > 0) {
+                return alert(`Masih ada ${unhandled} data yang berstatus "Proses". Selesaikan semua data sebelum Simpan Final!`);
+            }
+
+            if(!confirm("Yakin menyimpan hasil final? Data akan dipindah ke Riwayat Selesai dan saldo akan dihitung.")) return;
+
+            try {
+                const stats = calculateCurrentStats();
+                let overallStatus = (stats.good > 0 && stats.good >= stats.disabled) ? "Good" : "Disabled";
+
+                // Hitung Rate (Logika Asli)
+                let finalRate = 0;
+                if (stats.good >= 30) finalRate = 6000;
+                else if (stats.good >= 20) finalRate = 5500;
+                else if (stats.good >= 10) finalRate = 5000;
+                else if (stats.good >= 1) finalRate = 4500;
+                
+                let totalRpValid = stats.good * finalRate;
+
+                // Cek agar tidak bayar ganda
+                const isAlreadyCredited = pw.originalDoc.isCredited === true;
+
+                const subRef = doc(db, "submissions", pw.id);
+                await updateDoc(subRef, {
+                    emailResults: pw.emails,
+                    stats: stats,
+                    status: overallStatus,
+                    creditedRp: totalRpValid,
+                    isCredited: true
+                });
+
+                // Proses Saldo & Referral (Sesuai Logika Asli)
+                if (pw.uid) {
+                    if (!isAlreadyCredited && totalRpValid > 0) {
+                        const userRef = doc(db, "users", pw.uid);
+                        await updateDoc(userRef, { balance: increment(totalRpValid) });
+                    }
+
+                    // Referral Logic
+                    const subsQuery = query(collection(db, "submissions"), where("uid", "==", pw.uid));
+                    const subsSnap = await getDocs(subsQuery);
+                    let totalAccumulatedGood = 0;
+                    let totalAccumulatedSubmitted = 0;
+                    subsSnap.forEach(s => {
+                        const sData = s.data();
+                        totalAccumulatedGood += (sData.stats?.good || 0);
+                        totalAccumulatedSubmitted += (sData.count || 0);
+                    });
+
+                    const userRef = doc(db, "users", pw.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        if (userData.referredBy) {
+                            const referrerRef = doc(db, "users", userData.referredBy);
+                            const referrerSnap = await getDoc(referrerRef);
+                            if (referrerSnap.exists()) {
+                                const refs = referrerSnap.data().referrals || [];
+                                let arrayUpdated = false;
+                                const newRefs = refs.map(r => {
+                                    if (r.uid === pw.uid) {
+                                        arrayUpdated = true;
+                                        return { ...r, totalGood: totalAccumulatedGood, totalSubmitted: totalAccumulatedSubmitted, isValid: totalAccumulatedGood >= 10 };
+                                    }
+                                    return r;
+                                });
+                                if (arrayUpdated) await updateDoc(referrerRef, { referrals: newRefs });
+                            }
+                        }
+                    }
+                }
+
+                document.getElementById('processing-workspace').classList.add('hidden');
+                document.getElementById('processing-workspace').classList.remove('flex');
+                await loadSubmissionsData();
+                await loadUsers();
+                alert(`Pekerjaan Selesai! Rp ${totalRpValid.toLocaleString('id-ID')} ditambahkan ke saldo.`);
+
+            } catch(e) { alert("Error Finalisasi: " + e.message); }
+        };
+
+        // ------------- RIWAYAT SELESAI LOGIC ------------- //
+        function renderRiwayatSelesai() {
+            const container = document.getElementById('completed-container');
+            const completedGroups = {};
+
+            allSubmissionsData.forEach(sub => {
+                const state = getComputedSubState(sub);
+                if (state.cat === 'Selesai') {
+                    const dateObj = sub.createdAt ? new Date(sub.createdAt) : new Date();
+                    const dateKey = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                    if(!completedGroups[dateKey]) completedGroups[dateKey] = { t: dateObj.getTime(), items: [] };
+                    completedGroups[dateKey].items.push(sub);
+                }
+            });
+
+            const sortedDates = Object.keys(completedGroups).sort((a,b) => completedGroups[b].t - completedGroups[a].t);
+            container.innerHTML = '';
+
+            if(sortedDates.length === 0) {
+                container.innerHTML = '<div class="glass-card p-8 text-center text-slate-500 italic rounded-2xl border border-white/5 shadow-xl">Belum ada riwayat.</div>';
+                return;
+            }
+
+            sortedDates.forEach((dateKey, idx) => {
+                const items = completedGroups[dateKey].items.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+                const safeId = 'acc-' + idx;
+                
+                let rowsHtml = items.map(sub => {
+                    const st = sub.stats || {good:0, disabled:0, verif:0, notExist:0};
+                    const rp = sub.creditedRp || 0;
+                    return `
+                        <tr class="border-b border-white/5 last:border-0 hover:bg-white/5">
+                            <td class="p-3 text-xs"><span class="font-bold text-white block">${sub.userName}</span><span class="text-[10px] text-slate-500">${new Date(sub.createdAt).toLocaleTimeString('id-ID')}</span></td>
+                            <td class="p-3 text-[10px] text-emerald-400 font-bold">G:${st.good} | D:${st.disabled}</td>
+                            <td class="p-3 text-xs font-bold text-emerald-400">Rp ${rp.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-right">
+                                <span class="px-2 py-0.5 text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold rounded">SELESAI</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                container.innerHTML += `
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/5">
+                        <button onclick="document.getElementById('${safeId}').classList.toggle('hidden')" class="w-full flex justify-between items-center p-4 bg-slate-900/80 hover:bg-slate-800 focus:outline-none transition">
+                            <span class="font-bold text-white text-sm"><i class="fa-solid fa-calendar-check text-emerald-400 mr-2"></i>${dateKey} <span class="ml-2 px-2 py-0.5 bg-slate-800 rounded text-[10px] font-normal">${items.length} Data</span></span>
+                            <i class="fa-solid fa-chevron-down text-slate-500"></i>
+                        </button>
+                        <div id="${safeId}" class="${idx===0?'block':'hidden'} border-t border-white/5 overflow-x-auto">
+                            <table class="w-full text-left whitespace-nowrap"><tbody class="divide-y divide-white/5">${rowsHtml}</tbody></table>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // ------------- FUNGSI BAWAAN LAMA (USERS, REF, WD) TETAP ADA & BERFUNGSI ------------- //
+        // (Kode di bawah hanya refactoring ringan untuk menyesuaikan variabel global, logika tidak berubah)
+        
+        window.loadUsers = async function() {
+            try {
+                const snap = await getDocs(query(collection(db, "users")));
+                allUsersData = []; snap.forEach(d => allUsersData.push({id:d.id, ...d.data()}));
+                allUsersData.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+                renderTableUsers(allUsersData);
+            } catch(e) { console.error(e); }
+        };
+        
+        window.renderTableUsers = function(data) {
+            const tbody = document.getElementById('users-tbody'); tbody.innerHTML = '';
+            if(!data.length) return tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Kosong</td></tr>';
+            data.forEach(user => {
+                const bal = user.balance||0; const refs = user.referrals||[]; const validRefs = refs.filter(r=>r.isValid);
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 border-b border-white/5">
+                        <td class="p-4"><span class="block font-bold text-white text-xs">${user.name}</span><span class="block text-[10px] text-slate-400">${user.email}</span></td>
+                        <td class="p-4 text-emerald-400 font-bold">Rp ${bal.toLocaleString('id-ID')}</td>
+                        <td class="p-4"><span class="text-purple-400 text-xs">${validRefs.length}/${refs.length} Valid</span></td>
+                        <td class="p-4"><span class="text-[10px] text-slate-500">${user.ip||'-'}</span></td>
+                        <td class="p-4 text-right"><button onclick="openBalanceModal('${user.id}','${user.email}',${bal})" class="px-3 py-1 text-[10px] bg-emerald-500/10 text-emerald-400 rounded-lg">Edit</button></td>
+                    </tr>
+                `;
+            });
+        };
+        window.filterTable = function() {
+            const v = document.getElementById('searchInput').value.toLowerCase();
+            renderTableUsers(allUsersData.filter(u => (u.name&&u.name.toLowerCase().includes(v)) || (u.email&&u.email.toLowerCase().includes(v))));
+        };
+        
+        // Modal Saldo Logic
+        window.openBalanceModal = function(uid, email, bal) {
+            document.getElementById('editUid').value = uid; document.getElementById('modalUserEmail').textContent = email;
+            document.getElementById('modalCurrentBalance').textContent = `Rp ${bal.toLocaleString('id-ID')}`;
+            document.getElementById('editNominal').value = ''; document.getElementById('modalPreviewBalance').textContent = `Rp ${bal.toLocaleString('id-ID')}`;
+            document.getElementById('balanceModal').classList.replace('hidden', 'flex');
+        };
+        window.closeBalanceModal = function() { document.getElementById('balanceModal').classList.replace('flex', 'hidden'); };
+        window.updateCalcPreview = function() {
+            const bal = parseInt(document.getElementById('modalCurrentBalance').textContent.replace(/\D/g,'')) || 0;
+            const nom = parseInt(document.getElementById('editNominal').value) || 0;
+            const mode = document.querySelector('input[name="balanceMode"]:checked').value;
+            document.getElementById('modalPreviewBalance').textContent = `Rp ${(mode==='add'?bal+nom:nom).toLocaleString('id-ID')}`;
+        };
+        window.saveBalance = async function() {
+            const uid = document.getElementById('editUid').value;
+            const val = parseInt(document.getElementById('modalPreviewBalance').textContent.replace(/\D/g,''));
+            if(isNaN(val)) return;
+            try { await updateDoc(doc(db, "users", uid), { balance: val }); closeBalanceModal(); loadUsers(); } 
+            catch(e) { alert(e); }
+        };
+
+        // Referrals Logic
+        window.loadReferrals = async function() {
+            const tbody = document.getElementById('referrals-tbody'); tbody.innerHTML = '';
+            const inv = allUsersData.filter(u => u.referrals && u.referrals.length > 0);
+            if(!inv.length) return tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">Kosong</td></tr>';
+            inv.forEach(u => {
+                const vc = u.referrals.filter(r=>r.isValid).length;
+                tbody.innerHTML += `
+                    <tr class="border-b border-white/5 hover:bg-white/5">
+                        <td class="p-4"><span class="font-bold text-white text-xs">${u.name}</span></td>
+                        <td class="p-4 text-xs font-bold ${vc>=5?'text-emerald-400':'text-slate-400'}">${vc} Valid / ${u.referrals.length} Total</td>
+                        <td class="p-4 text-purple-400 text-xs font-bold">Rp ${(Math.max(0, Math.floor(vc/5)-(u.claimedReferralRewards||0))*40000).toLocaleString('id-ID')}</td>
+                        <td class="p-4 text-right"><button onclick="openReferralModal('${u.id}')" class="px-3 py-1 text-[10px] bg-blue-500/10 text-blue-400 rounded-lg">Detail</button></td>
+                    </tr>
+                `;
+            });
+        };
+        window.openReferralModal = function(uid) {
+            const u = allUsersData.find(x=>x.id===uid); if(!u) return;
+            document.getElementById('refModalUserLabel').textContent = `${u.name} (${u.email})`;
+            const tb = document.getElementById('refModalTbody'); tb.innerHTML = '';
+            u.referrals.forEach((r,i) => {
+                tb.innerHTML += `<tr class="border-b border-white/5"><td class="p-4 text-xs font-bold text-white">Teman ${i+1}<br><span class="text-[10px] text-slate-400">${r.name}</span></td><td class="p-4 text-center text-xs">${r.totalSubmitted||0}</td><td class="p-4 text-center text-xs text-emerald-400 font-bold">${r.totalGood||0}</td><td class="p-4 text-right">${r.isValid?'<span class="text-emerald-400 text-[10px]">VALID</span>':'<span class="text-slate-400 text-[10px]">WAITING</span>'}</td></tr>`;
+            });
+            document.getElementById('referralDetailModal').classList.replace('hidden','flex');
+        };
+        window.closeReferralModal = function() { document.getElementById('referralDetailModal').classList.replace('flex','hidden'); };
+
+        // Withdrawals Logic
+        window.loadWithdrawals = async function() {
+            try {
+                const snap = await getDocs(collection(db, "withdrawals"));
+                const tb = document.getElementById('withdrawals-tbody'); tb.innerHTML = '';
+                let wds = []; let pend = 0;
+                snap.forEach(d => { const dt = d.data(); if(dt.status==='Proses'||!dt.status) pend++; wds.push({id:d.id, ...dt}); });
+                wds.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+                
+                const b = document.getElementById('badgePendingWd');
+                if(pend>0){ b.textContent=pend; b.classList.remove('hidden'); } else { b.classList.add('hidden'); }
+                
+                if(!wds.length) return tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">Kosong</td></tr>';
+                wds.forEach(item => {
+                    const dt = item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID') : '-';
+                    tb.innerHTML += `
+                        <tr class="border-b border-white/5 hover:bg-white/5">
+                            <td class="p-4 text-[10px] text-slate-400">${dt}</td>
+                            <td class="p-4 text-xs font-bold text-white">${item.userName}</td>
+                            <td class="p-4 text-xs font-mono text-slate-300">${item.walletType} - ${item.walletNumber}</td>
+                            <td class="p-4 text-emerald-400 text-xs font-bold">Rp ${(item.amount||0).toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-[10px] font-bold text-amber-400">${item.status||'Proses'}</td>
+                            <td class="p-4 text-right space-x-1">
+                                <button onclick="updateWd('${item.id}', 'Sukses')" class="px-2 py-1 bg-emerald-600 rounded text-[10px] text-white"><i class="fa-solid fa-check"></i></button>
+                                <button onclick="updateWd('${item.id}', 'Gagal', '${item.uid}', ${item.amount})" class="px-2 py-1 bg-red-600 rounded text-[10px] text-white"><i class="fa-solid fa-xmark"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch(e) { console.error(e); }
+        };
+        window.updateWd = async function(id, st, uid=null, amt=0) {
+            if(!confirm("Ubah jadi "+st+"?")) return;
+            try {
+                await updateDoc(doc(db, "withdrawals", id), { status: st });
+                if(st==='Gagal'&&uid) {
+                    const u = await getDoc(doc(db,"users",uid));
+                    if(u.exists()) await updateDoc(doc(db,"users",uid), { balance: (u.data().balance||0)+amt });
+                }
+                loadWithdrawals(); loadUsers();
+            } catch(e) { alert(e); }
+        };
+
+        window.addEventListener("DOMContentLoaded", () => { if(typeof lucide!=='undefined') lucide.createIcons(); });
+    </script>
+</body>
+</html>
